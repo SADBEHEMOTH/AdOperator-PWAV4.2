@@ -173,13 +173,45 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 ml-4">
+                  <div className="flex items-center gap-2 ml-4">
                     <Badge
                       variant="outline"
                       className={statusColors[a.status] || "text-zinc-400"}
                     >
                       {statusLabels[a.status] || a.status}
                     </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          data-testid={`analysis-menu-${a.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-zinc-700 hover:text-white transition-colors p-1"
+                        >
+                          <MoreVertical className="h-4 w-4" strokeWidth={1.5} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            a.status === "completed" ? navigate(`/analysis/${a.id}`) : navigate(`/analysis/new?resume=${a.id}`);
+                          }}
+                          className="text-zinc-300 focus:text-white focus:bg-zinc-800 cursor-pointer"
+                        >
+                          <ChevronRight className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                          Abrir
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-zinc-800" />
+                        <DropdownMenuItem
+                          data-testid={`delete-analysis-${a.id}`}
+                          onClick={(e) => handleDelete(e, a.id)}
+                          className="text-red-400 focus:text-red-300 focus:bg-zinc-800 cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <ChevronRight
                       className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors"
                       strokeWidth={1.5}
