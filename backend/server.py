@@ -49,11 +49,50 @@ class UserLogin(BaseModel):
 class ProductInput(BaseModel):
     nome: str
     nicho: str
-    publico_alvo: str
     promessa_principal: str
-    beneficios: str
-    ingredientes_mecanismo: str
+    publico_alvo: Optional[str] = ""
+    beneficios: Optional[str] = ""
+    ingredientes_mecanismo: Optional[str] = ""
     tom: Optional[str] = ""
+
+# --- Compliance Checker ---
+
+RISKY_TERMS = {
+    "cura": "Use 'auxilia no tratamento' ou 'contribui para melhora'",
+    "curar": "Use 'auxiliar no tratamento'",
+    "elimina": "Use 'ajuda a reduzir' ou 'contribui para diminuir'",
+    "remove": "Use 'auxilia na reducao' ou 'contribui para minimizar'",
+    "100%": "Evite porcentagens absolutas. Use 'alta eficacia'",
+    "garantido": "Use 'resultados comprovados' ou 'alta satisfacao'",
+    "garantia de resultado": "Use 'compromisso com qualidade'",
+    "comprovado cientificamente": "Cite a fonte ou use 'baseado em estudos'",
+    "medicos recomendam": "Cite a fonte ou use 'profissionais reconhecem'",
+    "definitivo": "Use 'duradouro' ou 'de longo prazo'",
+    "milagroso": "Evite. Use termos mais moderados",
+    "revolucionario": "Use 'inovador' ou 'avancado'",
+    "unico no mercado": "Use 'diferenciado' ou 'com tecnologia propria'",
+    "sem efeitos colaterais": "Use 'bem tolerado' ou 'perfil de seguranca favoravel'",
+    "aprovado pela anvisa": "Cite o registro se verdadeiro",
+    "acabar com": "Use 'ajudar a reduzir' ou 'minimizar'",
+    "destruir": "Use 'combater' ou 'enfrentar'",
+    "nunca mais": "Evite promessas absolutas de permanencia",
+    "para sempre": "Use 'de longo prazo' ou 'duradouro'",
+}
+
+HIGH_SEVERITY = {"cura", "curar", "100%", "garantido", "milagroso", "sem efeitos colaterais", "nunca mais", "para sempre"}
+
+def run_compliance_check(text: str) -> dict:
+    text_lower = text.lower()
+    risks = []
+    for term, suggestion in RISKY_TERMS.items():
+        if term.lower() in text_lower:
+            risks.append({
+                "termo": term,
+                "sugestao": suggestion,
+                "severidade": "alta" if term in HIGH_SEVERITY else "media"
+            })
+    score = max(0, 100 - len(risks) * 15)
+    return {"riscos": risks, "score": score, "total_riscos": len(risks)}
 
 # --- Auth Helpers ---
 
