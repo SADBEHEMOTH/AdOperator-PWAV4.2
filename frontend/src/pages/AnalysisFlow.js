@@ -621,7 +621,7 @@ export default function AnalysisFlow() {
             </>
           ) : (
             <>
-              Simular Publico
+              Rodar simulacao e decidir
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
