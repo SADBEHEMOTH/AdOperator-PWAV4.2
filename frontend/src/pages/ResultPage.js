@@ -115,6 +115,29 @@ export default function ResultPage() {
                   {d.vencedor?.pontuacao_final}
                 </span>
               </div>
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <Button
+                  data-testid="share-result-button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShare}
+                  disabled={sharing}
+                  className="text-zinc-500 hover:text-white text-xs"
+                >
+                  <Share2 className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  {sharing ? "Gerando..." : "Compartilhar"}
+                </Button>
+                <Button
+                  data-testid="export-result-button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExport}
+                  className="text-zinc-500 hover:text-white text-xs"
+                >
+                  <Download className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  Exportar PDF
+                </Button>
+              </div>
             </div>
 
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] rounded-md p-8 space-y-6">
