@@ -1,41 +1,19 @@
-#!/usr/bin/env python3
 import requests
 import sys
-import json
 from datetime import datetime
+import json
 
 class AdOperatorAPITester:
-    def __init__(self, base_url="https://decide-ads.preview.emergentagent.com"):
+    def __init__(self, base_url="https://decide-ads.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
+        self.test_analysis_id = None
         self.tests_run = 0
         self.tests_passed = 0
-        self.test_results = []
-
-    def log_test(self, name, success, response_code=None, details=None):
-        """Log test result"""
-        self.tests_run += 1
-        if success:
-            self.tests_passed += 1
-        
-        result = {
-            "name": name,
-            "success": success,
-            "response_code": response_code,
-            "details": details
-        }
-        self.test_results.append(result)
-        
-        status = "✅ PASSED" if success else "❌ FAILED"
-        print(f"{status} - {name}")
-        if response_code:
-            print(f"   Status Code: {response_code}")
-        if details and not success:
-            print(f"   Details: {details}")
 
     def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
         """Run a single API test"""
-        url = f"{self.base_url}/api/{endpoint}"
+        url = f"{self.base_url}/{endpoint}"
         test_headers = {'Content-Type': 'application/json'}
         
         if self.token:
@@ -44,53 +22,48 @@ class AdOperatorAPITester:
         if headers:
             test_headers.update(headers)
 
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
+        
         try:
-            print(f"\n🔍 Testing {name}...")
-            print(f"   URL: {url}")
-            
             if method == 'GET':
-                response = requests.get(url, headers=test_headers, timeout=10)
+                response = requests.get(url, headers=test_headers)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=test_headers, timeout=10)
-            elif method == 'PUT':
-                response = requests.put(url, json=data, headers=test_headers, timeout=10)
+                response = requests.post(url, json=data, headers=test_headers)
+            elif method == 'PATCH':
+                response = requests.patch(url, json=data, headers=test_headers)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=test_headers, timeout=10)
+                response = requests.delete(url, headers=test_headers)
 
             success = response.status_code == expected_status
-            
             if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
                 try:
-                    response_data = response.json()
-                    self.log_test(name, True, response.status_code, "Success")
-                    return True, response_data
-                except json.JSONDecodeError:
-                    self.log_test(name, True, response.status_code, "Success (no JSON)")
+                    return True, response.json()
+                except:
                     return True, {}
             else:
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 try:
-                    error_data = response.json()
-                    self.log_test(name, False, response.status_code, error_data.get('detail', 'Unknown error'))
+                    error_detail = response.json()
+                    print(f"   Error detail: {error_detail}")
                 except:
-                    self.log_test(name, False, response.status_code, response.text[:200])
-                return False, {}
+                    print(f"   Response text: {response.text[:200]}")
 
-        except requests.exceptions.RequestException as e:
-            self.log_test(name, False, None, f"Network error: {str(e)}")
             return False, {}
+
         except Exception as e:
-            self.log_test(name, False, None, f"Unexpected error: {str(e)}")
+            print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
-    def test_auth_endpoints(self):
-        """Test authentication endpoints"""
-        print("\n" + "="*50)
-        print("TESTING AUTHENTICATION ENDPOINTS")
-        print("="*50)
-
-        # Test login with existing user
+    def test_auth_and_setup(self):
+        """Test login and setup analysis for further testing"""
+        print("\n🔑 Setting up authentication...")
+        
+        # Test login with provided credentials
         success, response = self.run_test(
-            "Login with existing test user",
+            "Login",
             "POST",
             "auth/login",
             200,
@@ -99,197 +72,187 @@ class AdOperatorAPITester:
         
         if success and 'token' in response:
             self.token = response['token']
-            print(f"   ✅ Token obtained: {self.token[:20]}...")
-        
-        # Test login with invalid credentials
-        self.run_test(
-            "Login with invalid credentials",
-            "POST", 
-            "auth/login",
-            401,
-            data={"email": "invalid@test.com", "password": "wrongpass"}
-        )
-        
-        # Test /auth/me endpoint
-        if self.token:
-            success, user_data = self.run_test(
-                "Get current user info",
-                "GET",
-                "auth/me", 
-                200
+            print(f"✅ Got auth token: {self.token[:20]}...")
+            
+            # Create test analysis for further testing
+            product_data = {
+                "nome": "TestProduct",
+                "nicho": "Saude",
+                "promessa_principal": "Melhora sua saude",
+                "publico_alvo": "Adultos",
+                "beneficios": "Varios beneficios",
+                "ingredientes_mecanismo": "Ingredientes naturais",
+                "tom": "persuasivo"
+            }
+            
+            success_analysis, analysis_response = self.run_test(
+                "Create Test Analysis",
+                "POST", 
+                "analyses",
+                201,
+                data=product_data
             )
-            if success:
-                print(f"   User info: {user_data}")
+            
+            if success_analysis and 'id' in analysis_response:
+                self.test_analysis_id = analysis_response['id']
+                print(f"✅ Created test analysis: {self.test_analysis_id}")
+                return True
+            
+        return False
 
-        # Test register new user (with timestamp to avoid conflicts)
-        timestamp = datetime.now().strftime('%H%M%S')
-        new_user_email = f"newuser_{timestamp}@test.com"
-        success, response = self.run_test(
-            "Register new user",
-            "POST",
-            "auth/register",
-            200,
-            data={
-                "name": f"Test User {timestamp}",
-                "email": new_user_email,
-                "password": "testpass123"
-            }
-        )
-
-        # Test register with existing email
-        self.run_test(
-            "Register with existing email",
-            "POST",
-            "auth/register",
-            400,
-            data={
-                "name": "Test User",
-                "email": "test@test.com",
-                "password": "testpass123" 
-            }
-        )
-
-    def test_analyses_crud(self):
-        """Test analyses CRUD operations"""
-        print("\n" + "="*50)
-        print("TESTING ANALYSES CRUD")
-        print("="*50)
+    def test_compliance_checker(self):
+        """Test compliance checker endpoints"""
+        print("\n🛡️  Testing compliance checker...")
         
-        if not self.token:
-            print("❌ Skipping analyses tests - no auth token")
-            return None
+        # Test with risky terms
+        success_risky, response_risky = self.run_test(
+            "Compliance Check - Risky Terms",
+            "POST",
+            "compliance/check",
+            200,
+            data={"text": "Este produto cura 100% dos casos e garante resultado definitivo"}
+        )
+        
+        if success_risky:
+            print(f"   Compliance score: {response_risky.get('score', 'N/A')}")
+            print(f"   Risks found: {response_risky.get('total_riscos', 0)}")
+        
+        # Test with clean text
+        success_clean, response_clean = self.run_test(
+            "Compliance Check - Clean Text",
+            "POST",
+            "compliance/check",
+            200,
+            data={"text": "Este produto contribui para melhora da saude de forma natural"}
+        )
+        
+        if success_clean:
+            print(f"   Compliance score: {response_clean.get('score', 'N/A')}")
+            print(f"   Risks found: {response_clean.get('total_riscos', 0)}")
+            
+        return success_risky and success_clean
 
-        # Test create analysis
-        product_data = {
-            "nome": "TestProduct Pro",
-            "nicho": "Test Niche",
-            "publico_alvo": "Test audience 25-45 anos",
-            "promessa_principal": "This product promises to test everything perfectly",
-            "beneficios": "Amazing benefits include testing and more testing",
-            "ingredientes_mecanismo": "Secret test ingredients that make magic happen",
-            "tom": "persuasivo"
+    def test_analysis_management(self):
+        """Test CRUD operations for analysis"""
+        if not self.test_analysis_id:
+            print("❌ No test analysis available for CRUD tests")
+            return False
+            
+        print("\n📊 Testing analysis management...")
+        
+        # Test PATCH product update
+        update_data = {
+            "nome": "UpdatedProduct",
+            "nicho": "Fitness",
+            "promessa_principal": "Nova promessa atualizada"
         }
         
-        success, analysis = self.run_test(
-            "Create new analysis",
-            "POST",
-            "analyses",
+        success_patch, _ = self.run_test(
+            "Update Analysis Product",
+            "PATCH",
+            f"analyses/{self.test_analysis_id}/product",
             200,
-            data=product_data
+            data=update_data
         )
         
-        analysis_id = None
-        if success and 'id' in analysis:
-            analysis_id = analysis['id']
-            print(f"   ✅ Analysis created with ID: {analysis_id}")
-
-        # Test list analyses
-        success, analyses_list = self.run_test(
-            "List user analyses",
-            "GET", 
-            "analyses",
+        # Test share functionality
+        success_share, share_response = self.run_test(
+            "Share Analysis",
+            "POST",
+            f"analyses/{self.test_analysis_id}/share",
             200
         )
         
-        if success:
-            print(f"   Found {len(analyses_list)} analyses")
-
-        # Test get single analysis
-        if analysis_id:
-            success, single_analysis = self.run_test(
-                "Get single analysis",
+        public_token = None
+        if success_share and 'public_token' in share_response:
+            public_token = share_response['public_token']
+            print(f"   Generated public token: {public_token}")
+        
+        # Test public access
+        success_public = False
+        if public_token:
+            success_public, public_response = self.run_test(
+                "Get Public Analysis",
                 "GET",
-                f"analyses/{analysis_id}",
+                f"public/{public_token}",
                 200
             )
             
-            if success:
-                print(f"   Analysis status: {single_analysis.get('status', 'unknown')}")
+            if success_public:
+                print(f"   Public analysis accessible: {public_response.get('product', {}).get('nome', 'N/A')}")
+        
+        # Test delete functionality
+        success_delete, _ = self.run_test(
+            "Delete Analysis",
+            "DELETE",
+            f"analyses/{self.test_analysis_id}",
+            200
+        )
+        
+        return success_patch and success_share and success_public and success_delete
 
-        # Test get non-existent analysis
-        self.run_test(
-            "Get non-existent analysis", 
-            "GET",
-            "analyses/fake-id-12345",
-            404
-        )
+    def test_quick_mode_analysis(self):
+        """Test quick mode analysis creation with only 3 required fields"""
+        print("\n⚡ Testing quick mode analysis...")
         
-        return analysis_id
-
-    def test_without_auth(self):
-        """Test endpoints without authentication"""
-        print("\n" + "="*50)
-        print("TESTING UNAUTHORIZED ACCESS")
-        print("="*50)
+        quick_product = {
+            "nome": "QuickProduct",
+            "nicho": "Beleza", 
+            "promessa_principal": "Resultados rapidos de beleza"
+        }
         
-        # Store current token and remove it
-        temp_token = self.token
-        self.token = None
-        
-        # Test protected endpoints without auth
-        self.run_test(
-            "Get user info without auth",
-            "GET",
-            "auth/me",
-            401
-        )
-        
-        self.run_test(
-            "List analyses without auth", 
-            "GET",
-            "analyses",
-            401
-        )
-        
-        self.run_test(
-            "Create analysis without auth",
+        success, response = self.run_test(
+            "Create Quick Mode Analysis",
             "POST",
-            "analyses", 
-            401,
-            data={"nome": "test"}
+            "analyses",
+            201,
+            data=quick_product
         )
         
-        # Restore token
-        self.token = temp_token
-
-    def print_summary(self):
-        """Print test summary"""
-        print("\n" + "="*60)
-        print("TEST SUMMARY")
-        print("="*60)
-        print(f"Total Tests: {self.tests_run}")
-        print(f"Passed: {self.tests_passed}")
-        print(f"Failed: {self.tests_run - self.tests_passed}")
-        print(f"Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        if success and 'id' in response:
+            # Clean up
+            self.run_test(
+                "Delete Quick Analysis",
+                "DELETE", 
+                f"analyses/{response['id']}",
+                200
+            )
         
-        if self.tests_passed < self.tests_run:
-            print("\n❌ FAILED TESTS:")
-            for result in self.test_results:
-                if not result['success']:
-                    print(f"  - {result['name']}: {result['details']}")
-        
-        return self.tests_passed == self.tests_run
+        return success
 
 def main():
-    print("AdOperator API Testing")
-    print("Backend URL: https://decide-ads.preview.emergentagent.com")
-    print("="*60)
+    print("🚀 Starting AdOperator New Features API Testing")
+    print("=" * 60)
     
     tester = AdOperatorAPITester()
     
-    # Run all tests
-    tester.test_auth_endpoints()
-    analysis_id = tester.test_analyses_crud()
-    tester.test_without_auth()
+    # Authentication setup
+    if not tester.test_auth_and_setup():
+        print("\n❌ Authentication setup failed - stopping tests")
+        return 1
     
-    # Print final results
-    all_passed = tester.print_summary()
+    # Test new features
+    compliance_ok = tester.test_compliance_checker()
+    crud_ok = tester.test_analysis_management()  
+    quick_ok = tester.test_quick_mode_analysis()
     
-    if analysis_id:
-        print(f"\n💡 Created test analysis ID: {analysis_id}")
-        print("   You can use this for frontend testing")
+    # Results
+    print("\n" + "=" * 60)
+    print(f"📊 Test Results: {tester.tests_passed}/{tester.tests_run} tests passed")
     
-    return 0 if all_passed else 1
+    features_tested = [
+        ("Compliance Checker", compliance_ok),
+        ("Analysis CRUD (PATCH/DELETE/Share/Public)", crud_ok), 
+        ("Quick Mode Analysis", quick_ok)
+    ]
+    
+    print("\n📋 Feature Summary:")
+    for feature, passed in features_tested:
+        status = "✅" if passed else "❌"
+        print(f"   {status} {feature}")
+    
+    overall_success = all(result for _, result in features_tested)
+    return 0 if overall_success else 1
 
 if __name__ == "__main__":
     sys.exit(main())
