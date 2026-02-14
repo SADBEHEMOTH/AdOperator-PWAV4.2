@@ -28,25 +28,18 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 ## What's Been Implemented (Feb 2026)
 - Full JWT authentication (register, login, token validation)
 - **Two input modes**: Quick (3 fields) and Complete (7 fields) with tab switcher
-- **Clickable example chips** under promessa field for quick fill
-- **Tone chips** for quick tone selection
-- **Auto-fill button** "Gerar exemplo" with sample product data
-- **Time indicator** (~45s) before submit CTA
-- **Compliance checker**: Detects risky medical/absolute terms in real-time with suggestions
-- **Better CTAs**: "Encontrar o melhor anuncio", "Escolher o anuncio vencedor", "Rodar simulacao e decidir"
-- 5-step analysis pipeline with Claude Sonnet 4.5
-- Strategic analysis display with compliance score
-- **Refinement form**: After strategic analysis in quick mode, users can add more details
-- 3 ad variations with hook, copy, UGC script per variation
-- 4-profile audience simulation with scores (0-100)
-- Decision engine with weighted scoring, ranking, and LP structure
-- **Copy to clipboard** on winning ad (hook and copy)
-- **Share via public link** for completed analyses
-- **PDF export** via browser print
-- **Delete analysis** from dashboard with dropdown menu
-- **Public result page** for shared links (/public/{token})
-- Dashboard with history, status badges, and analysis navigation
-- Dark minimalist UI (Manrope/Inter/JetBrains Mono fonts)
+- **Clickable chips** under promessa field + tone chips for quick selection
+- **Auto-fill** "Gerar exemplo" button + **Time indicator** (~45s)
+- **Compliance checker**: Risky terms detection with rewrite suggestions + score
+- **Experiment-format ad cards**: Hypothesis, target audience, strengths/weaknesses, predictive metrics (CTR, curiosity, block risk)
+- **Structurally diverse ads**: Personal story / Unexpected discovery / Attack on common mistake
+- **4-layer audience simulation**: Emotional reaction, 2s thought, probable decision, "what would make them click" + conflict detection + general trend
+- **Verdict-first decision**: Big headline, causal explanation, consequences of wrong choices, R$2000 recommendation
+- **Loop system**: Melhorar/Nova variacao/improvement chips, improve endpoint
+- **Live dashboard panel**: Current state, alerts, recommendations
+- **Staged loading**: Progressive feedback messages during AI processing
+- Copy to clipboard, Share via public link, PDF export, Delete analysis
+- Dark minimalist UI (Manrope/Inter/JetBrains Mono)
 
 ## Prioritized Backlog
 ### P0 (Critical)
