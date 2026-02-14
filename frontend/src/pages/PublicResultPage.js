@@ -36,11 +36,23 @@ export default function PublicResultPage() {
     );
   }
 
-  if (!data || data.status !== "completed") {
+  if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
         <div className="text-center">
-          <p className="text-zinc-500 text-sm">Analise nao encontrada ou ainda nao concluida.</p>
+          <p className="text-zinc-500 text-sm">Analise nao encontrada.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (data.status !== "completed") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+        <div className="text-center">
+          <Crosshair className="h-8 w-8 text-zinc-600 mx-auto mb-4" strokeWidth={1.5} />
+          <p className="text-zinc-400 text-sm">Analise ainda em andamento.</p>
+          <p className="text-zinc-600 text-xs mt-2">O resultado estara disponivel quando a analise for concluida.</p>
         </div>
       </div>
     );
