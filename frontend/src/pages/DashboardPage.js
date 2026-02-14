@@ -44,6 +44,17 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/analyses/${id}`);
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+      toast.success("Analise excluida");
+    } catch {
+      toast.error("Erro ao excluir");
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-zinc-800/50 px-6 py-4">
