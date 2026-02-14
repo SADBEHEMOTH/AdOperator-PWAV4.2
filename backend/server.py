@@ -539,6 +539,33 @@ SIMULAÇÃO DE PÚBLICO:
     )
     return result
 
+@api_router.post("/analyses/{analysis_id}/improve")
+async def improve_analysis(analysis_id: str, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
+    )
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analise nao encontrada")
+    if not analysis.get("decision"):
+        raise HTTPException(status_code=400, detail="Complete a analise primeiro")
+
+    new_id = str(uuid.uuid4())
+    doc = {
+        "id": new_id,
+        "user_id": user["id"],
+        "product": analysis["product"],
+        "strategic_analysis": None,
+        "ad_variations": None,
+        "audience_simulation": None,
+        "decision": None,
+        "status": "created",
+        "parent_id": analysis_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.analyses.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
 # --- App Setup ---
 
 app.include_router(api_router)
