@@ -68,9 +68,17 @@ const TONE_CHIPS = ["agressivo", "cientifico", "humano", "premium", "urgente", "
 
 const RISKY_TERMS_LOCAL = ["cura", "curar", "100%", "garantido", "milagroso", "elimina", "remove", "definitivo", "nunca mais", "para sempre", "sem efeitos colaterais"];
 
+const LOADING_STAGES = {
+  parse: ["Interpretando produto...", "Analisando nivel de consciencia...", "Mapeando objecoes..."],
+  generate: ["Construindo hipotese A...", "Diversificando estrutura...", "Calibrando metricas preditivas..."],
+  simulate: ["Simulando reacao de publico...", "Avaliando resistencia a mensagem...", "Calculando probabilidade de clique...", "Detectando conflitos entre perfis..."],
+  decide: ["Processando dados de simulacao...", "Comparando performance relativa...", "Calculando consequencias de cada escolha...", "Assumindo responsabilidade pela decisao..."],
+};
+
 export default function AnalysisFlow() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const [analysisId, setAnalysisId] = useState(null);
   const [data, setData] = useState(null);
   const [mode, setMode] = useState("quick");
