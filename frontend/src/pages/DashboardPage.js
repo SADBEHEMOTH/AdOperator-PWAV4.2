@@ -218,7 +218,7 @@ export default function DashboardPage() {
                     />
                   </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
