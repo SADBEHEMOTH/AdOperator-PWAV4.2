@@ -117,6 +117,87 @@ export default function DashboardPage() {
 
         <Separator className="bg-zinc-800/50 mb-8" />
 
+        {/* LIVE PANEL - Current State */}
+        {!loading && analyses.length > 0 && (() => {
+          const latest = analyses.find(a => a.status === "completed");
+          if (!latest) return null;
+          const d = latest.decision;
+          const v = d?.veredito || d?.vencedor || {};
+          const product = latest.product;
+          const completedCount = analyses.filter(a => a.status === "completed").length;
+          return (
+            <div className="mb-8 space-y-4 animate-fade-in-up" data-testid="live-panel">
+              {/* Current state block */}
+              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Estado Atual</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-zinc-500 text-xs">Produto ativo</p>
+                      <p className="text-white text-sm font-medium">{product?.nome}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-zinc-500 text-xs">Anuncio atual</p>
+                      <p className="text-white text-sm font-medium">{v.hipotese || `Variacao ${v.anuncio_numero}`}</p>
+                    </div>
+                  </div>
+                  {v.frase_principal && (
+                    <p className="text-zinc-400 text-xs border-l-2 border-zinc-800 pl-3">{v.frase_principal}</p>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <Button
+                      data-testid="improve-from-dashboard"
+                      size="sm"
+                      onClick={() => navigate(`/analysis/${latest.id}`)}
+                      className="bg-white text-black hover:bg-zinc-200 shadow-[0_0_10px_rgba(255,255,255,0.08)] rounded-sm font-semibold text-xs"
+                    >
+                      Melhorar anuncio <ArrowRight className="ml-1.5 h-3 w-3" />
+                    </Button>
+                    {completedCount > 1 && (
+                      <span className="text-emerald-400/60 text-xs flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" /> {completedCount} versoes geradas
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Alerts block */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-500/60 shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <p className="text-zinc-400 text-xs">Publico cetico tende a ignorar apos repeticao</p>
+                    <p className="text-zinc-600 text-xs mt-0.5">Considere testar nova abordagem</p>
+                  </div>
+                </div>
+                <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4 flex items-start gap-3">
+                  <Zap className="h-4 w-4 text-emerald-500/60 shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <p className="text-zinc-400 text-xs">Versao com erro comum pode performar melhor</p>
+                    <p className="text-zinc-600 text-xs mt-0.5">Teste provocacao direta</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-zinc-800/30" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Historico</span>
+                <button
+                  data-testid="new-product-secondary"
+                  onClick={() => navigate("/analysis/new")}
+                  className="text-zinc-600 hover:text-white text-xs transition-colors"
+                >
+                  + Novo produto
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -131,9 +212,8 @@ export default function DashboardPage() {
             <div className="w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center justify-center mx-auto mb-6">
               <Crosshair className="h-6 w-6 text-zinc-600" strokeWidth={1.5} />
             </div>
-            <p className="text-zinc-500 text-sm mb-6">
-              Nenhuma analise ainda. Comece descrevendo seu produto.
-            </p>
+            <p className="text-zinc-500 text-sm mb-2">Qual decisao voce precisa tomar hoje?</p>
+            <p className="text-zinc-600 text-xs mb-6">Descreva seu produto e deixe o motor decidir o melhor anuncio.</p>
             <Button
               data-testid="first-analysis-button"
               onClick={() => navigate("/analysis/new")}
