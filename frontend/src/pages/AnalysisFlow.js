@@ -122,9 +122,20 @@ export default function AnalysisFlow() {
     }
   }, [searchParams, loadAnalysis]);
 
+  const startStagedLoading = useCallback((stages) => {
+    setLoading(true);
+    setLoadingMessage(stages[0]);
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % stages.length;
+      setLoadingMessage(stages[idx]);
+    }, 3000);
+    return () => { clearInterval(interval); setLoadingMessage(""); };
+  }, []);
+
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const cleanup = startStagedLoading(LOADING_STAGES.parse);
     try {
       const { data: analysis } = await api.post("/analyses", product);
       setAnalysisId(analysis.id);
@@ -141,12 +152,13 @@ export default function AnalysisFlow() {
     } catch (err) {
       toast.error(err.response?.data?.detail || "Erro ao criar analise");
     } finally {
+      cleanup();
       setLoading(false);
     }
   };
 
   const runGenerate = async () => {
-    setLoading(true);
+    const cleanup = startStagedLoading(LOADING_STAGES.generate);
     try {
       const { data: result } = await api.post(
         `/analyses/${analysisId}/generate`
@@ -160,12 +172,13 @@ export default function AnalysisFlow() {
     } catch (err) {
       toast.error(err.response?.data?.detail || "Erro ao gerar anuncios");
     } finally {
+      cleanup();
       setLoading(false);
     }
   };
 
   const runSimulate = async () => {
-    setLoading(true);
+    const cleanup = startStagedLoading(LOADING_STAGES.simulate);
     try {
       const { data: result } = await api.post(
         `/analyses/${analysisId}/simulate`
@@ -179,12 +192,13 @@ export default function AnalysisFlow() {
     } catch (err) {
       toast.error(err.response?.data?.detail || "Erro ao simular publico");
     } finally {
+      cleanup();
       setLoading(false);
     }
   };
 
   const runDecide = async () => {
-    setLoading(true);
+    const cleanup = startStagedLoading(LOADING_STAGES.decide);
     try {
       const { data: result } = await api.post(
         `/analyses/${analysisId}/decide`
@@ -200,6 +214,7 @@ export default function AnalysisFlow() {
         err.response?.data?.detail || "Erro ao processar decisao"
       );
     } finally {
+      cleanup();
       setLoading(false);
     }
   };
