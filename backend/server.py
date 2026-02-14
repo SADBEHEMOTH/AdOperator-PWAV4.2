@@ -224,6 +224,55 @@ async def get_analysis(analysis_id: str, user=Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Análise não encontrada")
     return analysis
 
+# --- Compliance & Sharing Endpoints ---
+
+class ComplianceCheckInput(BaseModel):
+    text: str
+
+@api_router.post("/compliance/check")
+async def check_compliance_endpoint(data: ComplianceCheckInput):
+    return run_compliance_check(data.text)
+
+@api_router.delete("/analyses/{analysis_id}")
+async def delete_analysis(analysis_id: str, user=Depends(get_current_user)):
+    result = await db.analyses.delete_one({"id": analysis_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Analise nao encontrada")
+    return {"success": True}
+
+@api_router.patch("/analyses/{analysis_id}/product")
+async def update_analysis_product(analysis_id: str, product: ProductInput, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one({"id": analysis_id, "user_id": user["id"]}, {"_id": 0})
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analise nao encontrada")
+    await db.analyses.update_one(
+        {"id": analysis_id},
+        {"$set": {"product": product.model_dump()}}
+    )
+    return {"success": True}
+
+@api_router.post("/analyses/{analysis_id}/share")
+async def share_analysis(analysis_id: str, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one({"id": analysis_id, "user_id": user["id"]}, {"_id": 0})
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analise nao encontrada")
+    public_token = analysis.get("public_token")
+    if not public_token:
+        public_token = str(uuid.uuid4())[:12]
+        await db.analyses.update_one(
+            {"id": analysis_id},
+            {"$set": {"public_token": public_token}}
+        )
+    return {"public_token": public_token}
+
+@api_router.get("/public/{token}")
+async def get_public_analysis(token: str):
+    analysis = await db.analyses.find_one({"public_token": token}, {"_id": 0})
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analise nao encontrada")
+    analysis.pop("user_id", None)
+    return analysis
+
 # --- AI Pipeline Endpoints ---
 
 @api_router.post("/analyses/{analysis_id}/parse")
