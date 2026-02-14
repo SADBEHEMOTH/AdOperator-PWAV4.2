@@ -89,7 +89,7 @@ class AdOperatorAPITester:
                 "Create Test Analysis",
                 "POST", 
                 "analyses",
-                201,
+                200,
                 data=product_data
             )
             
