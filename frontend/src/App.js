@@ -5,6 +5,7 @@ import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import AnalysisFlow from "@/pages/AnalysisFlow";
 import ResultPage from "@/pages/ResultPage";
+import PublicResultPage from "@/pages/PublicResultPage";
 import "@/App.css";
 
 const ProtectedRoute = ({ children }) => {
