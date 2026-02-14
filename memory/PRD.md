@@ -27,16 +27,26 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 
 ## What's Been Implemented (Feb 2026)
 - Full JWT authentication (register, login, token validation)
-- Product input form with all 7 fields + tone selector
+- **Two input modes**: Quick (3 fields) and Complete (7 fields) with tab switcher
+- **Clickable example chips** under promessa field for quick fill
+- **Tone chips** for quick tone selection
+- **Auto-fill button** "Gerar exemplo" with sample product data
+- **Time indicator** (~45s) before submit CTA
+- **Compliance checker**: Detects risky medical/absolute terms in real-time with suggestions
+- **Better CTAs**: "Encontrar o melhor anuncio", "Escolher o anuncio vencedor", "Rodar simulacao e decidir"
 - 5-step analysis pipeline with Claude Sonnet 4.5
-- Strategic analysis display with all 6 strategy dimensions
+- Strategic analysis display with compliance score
+- **Refinement form**: After strategic analysis in quick mode, users can add more details
 - 3 ad variations with hook, copy, UGC script per variation
 - 4-profile audience simulation with scores (0-100)
 - Decision engine with weighted scoring, ranking, and LP structure
+- **Copy to clipboard** on winning ad (hook and copy)
+- **Share via public link** for completed analyses
+- **PDF export** via browser print
+- **Delete analysis** from dashboard with dropdown menu
+- **Public result page** for shared links (/public/{token})
 - Dashboard with history, status badges, and analysis navigation
 - Dark minimalist UI (Manrope/Inter/JetBrains Mono fonts)
-- Stepper component for progress tracking
-- Resume incomplete analyses
 
 ## Prioritized Backlog
 ### P0 (Critical)
