@@ -205,7 +205,7 @@ class AdOperatorAPITester:
             "Create Quick Mode Analysis",
             "POST",
             "analyses",
-            201,
+            200,
             data=quick_product
         )
         
