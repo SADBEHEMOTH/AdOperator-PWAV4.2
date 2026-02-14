@@ -335,22 +335,42 @@ async def generate_ads(analysis_id: str, user=Depends(get_current_user)):
     if not strategy:
         raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
 
-    system_msg = """Você é um copywriter especialista em anúncios digitais para tráfego pago.
-Com base no produto e na análise estratégica, crie 3 variações de anúncios COMPLETAMENTE DIFERENTES.
-Retorne APENAS um JSON válido (sem markdown, sem explicação extra) com esta estrutura exata:
+    system_msg = """Você é um copywriter estrategista de performance para tráfego pago.
+Crie 3 variações de anúncios ESTRUTURALMENTE DIFERENTES como um EXPERIMENTO CONTROLADO.
+
+REGRA CRÍTICA DE DIVERSIDADE:
+- Variação 1: HISTÓRIA PESSOAL — narrativa de descoberta, conexão emocional
+- Variação 2: DESCOBERTA INESPERADA — dado surpreendente, quebra de padrão
+- Variação 3: ATAQUE AO ERRO COMUM — provocação direta, confronto de crença
+
+Se os 3 anúncios parecerem variações do mesmo texto com palavras diferentes, o experimento falha.
+
+Retorne APENAS JSON válido (sem markdown):
 {
+  "nota_experimental": "Não avaliamos anúncios por estética, e sim por reação provável do público.",
   "anuncios": [
     {
       "numero": 1,
-      "hook": "string - gancho de abertura impactante (1-2 frases)",
+      "hipotese": "string curta (ex: Curiosidade, Identificação, Autoridade)",
+      "objetivo": "string - o que tenta provocar no público (ex: gerar clique sem julgamento inicial)",
+      "estrategia": "string - mecanismo psicológico (ex: abrir loop cognitivo)",
+      "publico_indicado": "string - tipo de público ideal (ex: Público frio - Baixa consciência do problema)",
+      "hook": "string - gancho de abertura impactante",
       "copy": "string - copy curta e persuasiva (3-5 frases)",
-      "roteiro_ugc": "string - roteiro simples para vídeo UGC (5-8 passos numerados)",
-      "abordagem": "string - descrição curta da abordagem usada (ex: emocional, racional, urgência)"
+      "roteiro_ugc": "string - roteiro para vídeo UGC (5-8 passos)",
+      "abordagem_estrutural": "string - História pessoal / Descoberta inesperada / Ataque ao erro comum",
+      "pontos_fortes": ["2-3 pontos fortes concretos"],
+      "pontos_fracos": ["1-2 pontos fracos honestos"],
+      "metricas_preditivas": {
+        "ctr_estimado": "string range (ex: 2.8-3.5%)",
+        "nivel_curiosidade": "Baixo/Médio/Alto",
+        "risco_bloqueio": "Baixo/Médio/Alto",
+        "probabilidade_conversao": "Baixa/Média/Alta"
+      }
     }
   ]
 }
-Crie exatamente 3 anúncios. Cada um deve usar um ângulo completamente diferente: um emocional, um racional/lógico, um urgente/escassez.
-Retorne SOMENTE o JSON, nada mais."""
+Retorne SOMENTE o JSON."""
 
     user_text = f"""PRODUTO:
 Nome: {product['nome']}
