@@ -53,6 +53,21 @@ const STEP_DESCRIPTIONS = [
   "O motor de decisao escolheu o melhor anuncio.",
 ];
 
+const EXAMPLE_PRODUCT = {
+  nome: "CapilarMax Pro",
+  nicho: "Saude Capilar",
+  promessa_principal: "Reduzir a queda de cabelo em ate 60% nos primeiros 90 dias",
+  publico_alvo: "Homens de 25-55 anos que sofrem com queda de cabelo",
+  beneficios: "Fortalece os fios, estimula o crescimento, reduz a oleosidade do couro cabeludo, resultados visiveis em 30 dias",
+  ingredientes_mecanismo: "Complexo de biotina + zinco + saw palmetto que atua bloqueando o DHT no foliculo capilar",
+  tom: "direto",
+};
+
+const PROMISE_CHIPS = ["reduzir queda", "aumentar densidade", "engrossar fios", "acelerar crescimento", "eliminar dor", "mais energia", "emagrecer rapido"];
+const TONE_CHIPS = ["agressivo", "cientifico", "humano", "premium", "urgente", "provocativo"];
+
+const RISKY_TERMS_LOCAL = ["cura", "curar", "100%", "garantido", "milagroso", "elimina", "remove", "definitivo", "nunca mais", "para sempre", "sem efeitos colaterais"];
+
 export default function AnalysisFlow() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
