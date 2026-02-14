@@ -1,15 +1,19 @@
+#!/usr/bin/env python3
+
 import requests
 import sys
 from datetime import datetime
 import json
+from typing import Dict, Any, Optional
 
 class AdOperatorAPITester:
-    def __init__(self, base_url="https://decide-ads.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://decide-ads.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.test_analysis_id = None
         self.tests_run = 0
         self.tests_passed = 0
+        self.session = requests.Session()
 
     def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
         """Run a single API test"""
