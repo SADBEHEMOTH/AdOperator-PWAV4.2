@@ -355,10 +355,14 @@ Retorne SOMENTE o JSON, nada mais."""
     user_text = f"""PRODUTO:
 Nome: {product['nome']}
 Nicho: {product['nicho']}
-Público: {product['publico_alvo']}
-Promessa: {product['promessa_principal']}
-Benefícios: {product['beneficios']}
-Mecanismo: {product['ingredientes_mecanismo']}
+Promessa: {product['promessa_principal']}"""
+    if product.get('publico_alvo'):
+        user_text += f"\nPúblico: {product['publico_alvo']}"
+    if product.get('beneficios'):
+        user_text += f"\nBenefícios: {product['beneficios']}"
+    if product.get('ingredientes_mecanismo'):
+        user_text += f"\nMecanismo: {product['ingredientes_mecanismo']}"
+    user_text += f"""
 
 ANÁLISE ESTRATÉGICA:
 Nível de consciência: {strategy.get('nivel_consciencia', '')}
