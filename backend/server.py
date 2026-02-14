@@ -299,13 +299,22 @@ Retorne SOMENTE o JSON, nada mais."""
 
     user_text = f"""Produto: {product['nome']}
 Nicho: {product['nicho']}
-Público-alvo: {product['publico_alvo']}
-Promessa principal: {product['promessa_principal']}
-Benefícios: {product['beneficios']}
-Ingredientes/Mecanismo: {product['ingredientes_mecanismo']}
-Tom desejado: {product.get('tom', 'persuasivo')}"""
+Promessa principal: {product['promessa_principal']}"""
+    if product.get('publico_alvo'):
+        user_text += f"\nPúblico-alvo: {product['publico_alvo']}"
+    if product.get('beneficios'):
+        user_text += f"\nBenefícios: {product['beneficios']}"
+    if product.get('ingredientes_mecanismo'):
+        user_text += f"\nIngredientes/Mecanismo: {product['ingredientes_mecanismo']}"
+    if product.get('tom'):
+        user_text += f"\nTom desejado: {product['tom']}"
 
     result = await call_claude(system_msg, user_text, f"parse-{analysis_id}")
+
+    # Run compliance check on product text
+    all_text = " ".join([v for v in product.values() if isinstance(v, str) and v])
+    compliance = run_compliance_check(all_text)
+    result["compliance"] = compliance
 
     await db.analyses.update_one(
         {"id": analysis_id},
