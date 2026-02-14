@@ -15,9 +15,10 @@ class AdOperatorAPITester:
         self.tests_passed = 0
         self.session = requests.Session()
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+    def run_test(self, name: str, method: str, endpoint: str, expected_status: int, 
+                 data: Optional[Dict] = None, headers: Optional[Dict] = None) -> tuple[bool, Dict]:
         """Run a single API test"""
-        url = f"{self.base_url}/{endpoint}"
+        url = f"{self.base_url}/api/{endpoint}"
         test_headers = {'Content-Type': 'application/json'}
         
         if self.token:
@@ -28,35 +29,39 @@ class AdOperatorAPITester:
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
+        print(f"   {method} {url}")
         
         try:
             if method == 'GET':
-                response = requests.get(url, headers=test_headers)
+                response = self.session.get(url, headers=test_headers, timeout=10)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=test_headers)
+                response = self.session.post(url, json=data, headers=test_headers, timeout=10)
             elif method == 'PATCH':
-                response = requests.patch(url, json=data, headers=test_headers)
+                response = self.session.patch(url, json=data, headers=test_headers, timeout=10)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=test_headers)
+                response = self.session.delete(url, headers=test_headers, timeout=10)
+            else:
+                print(f"❌ Unsupported method: {method}")
+                return False, {}
 
             success = response.status_code == expected_status
             if success:
                 self.tests_passed += 1
                 print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    return True, response.json()
-                except:
-                    return True, {}
+                if response.content:
+                    try:
+                        return True, response.json()
+                    except json.JSONDecodeError:
+                        return True, {"text": response.text}
+                return True, {}
             else:
                 print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
-                try:
-                    error_detail = response.json()
-                    print(f"   Error detail: {error_detail}")
-                except:
-                    print(f"   Response text: {response.text[:200]}")
+                print(f"   Response: {response.text[:200]}")
+                return False, {}
 
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Failed - Network Error: {str(e)}")
             return False, {}
-
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
