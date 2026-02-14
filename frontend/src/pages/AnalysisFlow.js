@@ -200,6 +200,43 @@ export default function AnalysisFlow() {
     setProduct((prev) => ({ ...prev, [field]: value }));
   };
 
+  const fillExample = () => {
+    setProduct(EXAMPLE_PRODUCT);
+    toast.success("Exemplo preenchido!");
+  };
+
+  const copyText = (text, label) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    toast.success("Copiado!");
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleShare = async () => {
+    try {
+      const { data: shareData } = await api.post(`/analyses/${analysisId}/share`);
+      const url = `${window.location.origin}/public/${shareData.public_token}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Link publico copiado!");
+    } catch {
+      toast.error("Erro ao gerar link");
+    }
+  };
+
+  const complianceWarnings = useMemo(() => {
+    const allText = `${product.nome} ${product.promessa_principal} ${product.beneficios} ${product.ingredientes_mecanismo}`.toLowerCase();
+    return RISKY_TERMS_LOCAL.filter((term) => allText.includes(term));
+  }, [product.nome, product.promessa_principal, product.beneficios, product.ingredientes_mecanismo]);
+
+  const handleRefineAndGenerate = async () => {
+    if (analysisId) {
+      try {
+        await api.patch(`/analyses/${analysisId}/product`, product);
+      } catch { /* continue anyway */ }
+    }
+    runGenerate();
+  };
+
   // ---- STEP RENDERERS ----
 
   const renderProductInput = () => (
