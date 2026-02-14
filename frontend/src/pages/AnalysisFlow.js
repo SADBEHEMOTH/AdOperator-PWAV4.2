@@ -471,8 +471,30 @@ export default function AnalysisFlow() {
   const renderStrategicAnalysis = () => {
     const s = data?.strategic_analysis;
     if (!s) return null;
+    const compliance = s.compliance;
     return (
       <div className="space-y-6 animate-fade-in-up">
+        {compliance && compliance.total_riscos > 0 && (
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-md p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-amber-400" strokeWidth={1.5} />
+              <span className="text-amber-400 text-xs font-mono uppercase tracking-widest">
+                Compliance Score: {compliance.score}/100
+              </span>
+            </div>
+            <div className="space-y-2">
+              {compliance.riscos.map((r, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs">
+                  <Badge variant="outline" className={`shrink-0 ${r.severidade === "alta" ? "text-red-400 border-red-400/30" : "text-amber-400 border-amber-400/30"}`}>
+                    {r.termo}
+                  </Badge>
+                  <span className="text-zinc-400">{r.sugestao}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-5">
           <div className="flex items-center gap-2 mb-2">
             <Brain className="h-4 w-4 text-white" strokeWidth={1.5} />
@@ -498,11 +520,7 @@ export default function AnalysisFlow() {
             </span>
             <div className="flex flex-wrap gap-2">
               {(s.objecoes || []).map((obj, i) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="text-zinc-400 border-zinc-800 text-xs"
-                >
+                <Badge key={i} variant="outline" className="text-zinc-400 border-zinc-800 text-xs">
                   {obj}
                 </Badge>
               ))}
@@ -510,9 +528,35 @@ export default function AnalysisFlow() {
           </div>
         </div>
 
+        {mode === "quick" && !showRefinement && (
+          <button
+            data-testid="show-refinement-button"
+            onClick={() => setShowRefinement(true)}
+            className="w-full text-left bg-zinc-900/20 border border-dashed border-zinc-800/50 rounded-md p-4 hover:border-zinc-700 transition-all duration-300 group"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-zinc-400 text-sm font-medium">Refinar dados do produto</p>
+                <p className="text-zinc-600 text-xs mt-0.5">Adicione beneficios, mecanismo e tom para resultados mais precisos</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" strokeWidth={1.5} />
+            </div>
+          </button>
+        )}
+
+        {showRefinement && (
+          <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-md p-6 space-y-5 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Dados Adicionais</span>
+              <button onClick={() => setShowRefinement(false)} className="text-zinc-600 hover:text-white text-xs transition-colors">Fechar</button>
+            </div>
+            {renderExtraFields()}
+          </div>
+        )}
+
         <Button
           data-testid="generate-ads-button"
-          onClick={runGenerate}
+          onClick={showRefinement ? handleRefineAndGenerate : runGenerate}
           disabled={loading}
           className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 rounded-sm h-12 font-semibold"
         >
@@ -523,7 +567,7 @@ export default function AnalysisFlow() {
             </>
           ) : (
             <>
-              Gerar Anuncios
+              Escolher o anuncio vencedor
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
