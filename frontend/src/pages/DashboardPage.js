@@ -10,8 +10,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Plus, LogOut, ChevronRight, Clock, User, Crosshair } from "lucide-react";
+import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical } from "lucide-react";
+import { toast } from "sonner";
 
 const statusLabels = {
   created: "Criado",
