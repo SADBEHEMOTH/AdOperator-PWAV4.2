@@ -412,14 +412,24 @@ async def simulate_audience(analysis_id: str, user=Depends(get_current_user)):
     if not ads:
         raise HTTPException(status_code=400, detail="Gere os anúncios primeiro")
 
-    system_msg = """Você simula 4 perfis de público reagindo a anúncios. Os perfis são:
-1. Cético - questiona tudo, precisa de provas concretas
-2. Interessado - aberto a novidades, busca soluções
-3. Impulsivo - age por emoção, decide rápido
-4. Desconfiado - teve experiências ruins, é cauteloso
+    system_msg = """Você simula COMPORTAMENTO HUMANO real de 4 perfis reagindo a anúncios.
 
-Para CADA anúncio, CADA perfil deve dar sua reação com scores de 0-100.
-Retorne APENAS um JSON válido (sem markdown, sem explicação extra) com esta estrutura exata:
+Perfis:
+1. Cético — questiona tudo, teve experiências ruins com promessas online
+2. Interessado — busca soluções ativamente, aberto mas cauteloso
+3. Impulsivo — age por emoção, decide em segundos
+4. Desconfiado — já foi enganado, filtra tudo com ceticismo alto
+
+REGRA CRÍTICA: Simule COMPORTAMENTO, não análise.
+- Humanos reagem emocionalmente PRIMEIRO, depois justificam
+- A decisão já foi tomada antes da "análise"
+- DEVE haver CONFLITO entre perfis (nem todos concordam)
+- Impulsivo e Cético devem DIVERGIR frequentemente
+- Interessado deve HESITAR, não decidir rápido
+- Métricas são CONSEQUÊNCIA da reação, não o centro
+
+Para CADA anúncio, CADA perfil deve ter 4 CAMADAS de reação.
+Retorne APENAS JSON válido (sem markdown):
 {
   "simulacao": [
     {
@@ -427,17 +437,22 @@ Retorne APENAS um JSON válido (sem markdown, sem explicação extra) com esta e
       "reacoes": [
         {
           "perfil": "Cético",
-          "interesse": 65,
-          "clareza": 70,
-          "confianca": 45,
-          "probabilidade_clique": 30,
-          "comentario": "string - reação breve do perfil em 1 frase"
+          "reacao_emocional": "string - primeira reação instintiva, curta, humana (ex: 'parece propaganda comum, eu ignoraria')",
+          "pensamento_2s": "string - o que pensa 2 segundos depois (ex: 'mas espera... nunca vi isso abordado assim')",
+          "decisao_provavel": "string - ignorar / clicar / salvar / investigar",
+          "o_que_faria_clicar": "string - o que faria ESTE perfil clicar (ex: 'precisaria ver prova visual')",
+          "interesse": 45,
+          "clareza": 60,
+          "confianca": 30,
+          "probabilidade_clique": 25
         }
       ]
     }
-  ]
+  ],
+  "tendencia_geral": "string - padrão detectado (ex: 'anúncios baseados em curiosidade superam promessa direta neste nicho')",
+  "conflitos_detectados": "string - onde perfis divergem (ex: 'impulsivo e cético divergem fortemente na variação A — sinal de copy polarizante')"
 }
-Cada anúncio deve ter 4 reações (uma por perfil). Retorne SOMENTE o JSON, nada mais."""
+Retorne SOMENTE o JSON."""
 
     ads_text = json.dumps(ads, ensure_ascii=False)
     user_text = f"Analise os seguintes anúncios e simule as reações dos 4 perfis para cada um:\n\n{ads_text}"
