@@ -260,6 +260,16 @@ export default function AnalysisFlow() {
     runGenerate();
   };
 
+  const handleImprove = async () => {
+    try {
+      const { data: newAnalysis } = await api.post(`/analyses/${analysisId}/improve`);
+      navigate(`/analysis/new?resume=${newAnalysis.id}`);
+      window.location.reload();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erro ao criar melhoria");
+    }
+  };
+
   // ---- STEP RENDERERS ----
 
   // ---- Shared form field renderers ----
