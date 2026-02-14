@@ -23,6 +23,7 @@ function App() {
           <div className="noise-overlay" />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/public/:token" element={<PublicResultPage />} />
             <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/analysis/new" element={<ProtectedRoute><AnalysisFlow /></ProtectedRoute>} />
             <Route path="/analysis/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
