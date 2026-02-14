@@ -478,39 +478,52 @@ async def decide_winner(analysis_id: str, user=Depends(get_current_user)):
     if not simulation or not ads:
         raise HTTPException(status_code=400, detail="Execute a simulação primeiro")
 
-    system_msg = """Você é um motor de decisão analítico para anúncios digitais.
-Com base nos anúncios e nas reações simuladas do público, escolha O MELHOR anúncio.
-Calcule uma pontuação ponderada considerando:
-- Interesse médio (peso 30%)
-- Clareza média (peso 20%)
-- Confiança média (peso 25%)
-- Probabilidade de clique média (peso 25%)
+    system_msg = """Você é um motor de decisão que ASSUME RESPONSABILIDADE pela escolha.
+Você NÃO apresenta comparativo. Você DECIDE e EXPLICA com causalidade humana.
 
-Retorne APENAS um JSON válido (sem markdown, sem explicação extra) com esta estrutura exata:
+REGRA: Veredito PRIMEIRO. Dados DEPOIS.
+O usuário nunca deve precisar interpretar números para saber qual venceu.
+
+Use CAUSALIDADE HUMANA:
+ERRADO: "apresentou melhor equilíbrio entre métricas"
+CERTO: "vence porque cria curiosidade antes da avaliação lógica — reduz rejeição inicial"
+
+Retorne APENAS JSON válido (sem markdown):
 {
-  "vencedor": {
+  "veredito": {
     "anuncio_numero": 1,
     "pontuacao_final": 85.5,
-    "hook": "o hook completo do anúncio vencedor",
-    "copy": "a copy completa do anúncio vencedor",
-    "roteiro_ugc": "o roteiro UGC completo do anúncio vencedor"
+    "frase_principal": "string - frase de impacto (ex: Maior chance de gerar clique inicial em público frio)",
+    "explicacao_causal": "string - explicação com causalidade humana, NÃO relatório técnico",
+    "hook": "hook completo do vencedor",
+    "copy": "copy completa do vencedor",
+    "roteiro_ugc": "roteiro UGC completo do vencedor"
   },
-  "motivo": "string - explicação clara e detalhada de por que este anúncio venceu",
-  "fraquezas": ["string - lista de 2-3 fraquezas detectadas no anúncio vencedor"],
-  "sugestao_melhoria": "string - sugestão específica de como melhorar o anúncio vencedor",
+  "consequencias_outras": [
+    {
+      "anuncio_numero": 2,
+      "consequencia": "string - o que acontece se usar este (ex: tende a aumentar o custo por clique)"
+    }
+  ],
+  "investimento_recomendacao": "string - Se estivesse investindo R$2.000 hoje, usaria qual e por quê (responder com convicção)",
+  "proximo_passo": {
+    "acao": "string - próxima ação recomendada (ex: criar página baseada neste anúncio)",
+    "motivo": "string - por que fazer isso (ex: manter consistência narrativa aumenta conversão)"
+  },
+  "melhorias_possiveis": ["string - 3 ações de melhoria concretas (ex: adaptar para público quente, reduzir promessa direta, testar prova visual)"],
+  "fraquezas": ["string - 2-3 fraquezas honestas do vencedor"],
+  "sugestao_melhoria": "string - melhoria específica prioritária",
   "estrutura_lp": {
-    "headline": "string - headline sugerida para landing page",
-    "subheadline": "string - subheadline sugerida",
-    "secoes": ["string - lista de 4-6 seções sugeridas para a LP"]
+    "headline": "string",
+    "subheadline": "string",
+    "secoes": ["string - 4-6 seções"]
   },
-  "publico_compativel": "string - descrição detalhada do público mais compatível com este anúncio",
+  "publico_compativel": "string - público ideal detalhado",
   "ranking": [
-    {"anuncio_numero": 1, "pontuacao": 85.5},
-    {"anuncio_numero": 2, "pontuacao": 72.3},
-    {"anuncio_numero": 3, "pontuacao": 65.1}
+    {"anuncio_numero": 1, "pontuacao": 85.5}
   ]
 }
-Retorne SOMENTE o JSON, nada mais."""
+Retorne SOMENTE o JSON."""
 
     user_text = f"""ANÚNCIOS:
 {json.dumps(ads, ensure_ascii=False)}
