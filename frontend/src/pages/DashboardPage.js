@@ -145,7 +145,7 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-3 animate-fade-in-up">
             {analyses.map((a) => (
-              <button
+              <div
                 key={a.id}
                 data-testid={`analysis-item-${a.id}`}
                 onClick={() =>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
                     ? navigate(`/analysis/${a.id}`)
                     : navigate(`/analysis/new?resume=${a.id}`)
                 }
-                className="w-full text-left bg-zinc-900/30 border border-zinc-800/50 rounded-md p-5 hover:border-zinc-700 transition-all duration-300 group"
+                className="w-full text-left bg-zinc-900/30 border border-zinc-800/50 rounded-md p-5 hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
