@@ -742,12 +742,27 @@ export default function AnalysisFlow() {
               {d.vencedor?.pontuacao_final}
             </span>
           </div>
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <Button variant="ghost" size="sm" data-testid="share-decision" onClick={handleShare} className="text-zinc-500 hover:text-white text-xs">
+              <Share2 className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />Compartilhar
+            </Button>
+          </div>
         </div>
 
         <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] rounded-md p-8 space-y-6">
-          <InfoBlock label="Hook Vencedor" value={d.vencedor?.hook} highlight />
+          <div className="flex items-start justify-between">
+            <div className="flex-1"><InfoBlock label="Hook Vencedor" value={d.vencedor?.hook} highlight /></div>
+            <Button variant="ghost" size="icon" data-testid="copy-hook-decision" onClick={() => copyText(d.vencedor?.hook, "hook")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+              {copied === "hook" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
           <Separator className="bg-zinc-800/50" />
-          <InfoBlock label="Copy Final" value={d.vencedor?.copy} />
+          <div className="flex items-start justify-between">
+            <div className="flex-1"><InfoBlock label="Copy Final" value={d.vencedor?.copy} /></div>
+            <Button variant="ghost" size="icon" data-testid="copy-text-decision" onClick={() => copyText(d.vencedor?.copy, "copy")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+              {copied === "copy" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
           <Separator className="bg-zinc-800/50" />
           <div className="space-y-1">
             <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
