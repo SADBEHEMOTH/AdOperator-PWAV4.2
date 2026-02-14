@@ -50,21 +50,22 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 
 ## Prioritized Backlog
 ### P0 (Critical)
-- All core features implemented ✓
+- All core features implemented
 
 ### P1 (High)
-- Export analysis results as PDF
-- Copy ad text to clipboard with one click
+- AI-enhanced compliance rewrite suggestions (auto-suggest safer alternatives)
 - A/B testing tracking integration
+- Multi-language ad generation
 
 ### P2 (Medium)
 - Team collaboration features
 - Template library for common niches
 - Version history for analyses
 - Analytics dashboard for conversion tracking
+- Webhook integration for external platforms
 
 ## Next Tasks
-- Add copy-to-clipboard for winning ad
-- Add PDF export of full analysis
-- Add delete analysis functionality
-- Consider A/B testing integration
+- Integrate compliance scorer with AI rewrite suggestions
+- Add multi-language support (EN/ES)
+- Consider A/B testing tracking module
+- Team workspace with shared analyses
