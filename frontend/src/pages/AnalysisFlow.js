@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectTrigger,
@@ -27,6 +28,13 @@ import {
   AlertTriangle,
   Zap,
   Users,
+  Copy,
+  Check,
+  Share2,
+  ShieldCheck,
+  ShieldAlert,
+  Sparkles,
+  Clock,
 } from "lucide-react";
 
 const STEP_TITLES = [
