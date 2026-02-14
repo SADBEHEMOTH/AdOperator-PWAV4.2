@@ -12,6 +12,33 @@ export default function ResultPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(null);
+  const [sharing, setSharing] = useState(false);
+
+  const copyText = (text, label) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    toast.success("Copiado!");
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const { data: shareData } = await api.post(`/analyses/${id}/share`);
+      const url = `${window.location.origin}/public/${shareData.public_token}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Link publico copiado!");
+    } catch {
+      toast.error("Erro ao gerar link");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleExport = () => {
+    window.print();
+  };
 
   useEffect(() => {
     api.get(`/analyses/${id}`)
