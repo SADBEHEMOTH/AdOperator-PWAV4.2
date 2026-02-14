@@ -141,22 +141,32 @@ export default function ResultPage() {
             </div>
 
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] rounded-md p-8 space-y-6">
-              <div className="space-y-1">
-                <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-                  Hook
-                </span>
-                <p className="text-white text-lg font-medium">
-                  {d.vencedor?.hook}
-                </p>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                    Hook
+                  </span>
+                  <p className="text-white text-lg font-medium">
+                    {d.vencedor?.hook}
+                  </p>
+                </div>
+                <Button variant="ghost" size="icon" data-testid="copy-hook" onClick={() => copyText(d.vencedor?.hook, "hook")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+                  {copied === "hook" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
               </div>
               <Separator className="bg-zinc-800/50" />
-              <div className="space-y-1">
-                <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-                  Copy Final
-                </span>
-                <p className="text-zinc-300 text-sm leading-relaxed">
-                  {d.vencedor?.copy}
-                </p>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                    Copy Final
+                  </span>
+                  <p className="text-zinc-300 text-sm leading-relaxed">
+                    {d.vencedor?.copy}
+                  </p>
+                </div>
+                <Button variant="ghost" size="icon" data-testid="copy-text" onClick={() => copyText(d.vencedor?.copy, "copy")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+                  {copied === "copy" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
               </div>
               <Separator className="bg-zinc-800/50" />
               <div className="space-y-1">
