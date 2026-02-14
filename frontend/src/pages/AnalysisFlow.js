@@ -858,96 +858,116 @@ export default function AnalysisFlow() {
   const renderDecision = () => {
     const d = data?.decision;
     if (!d) return null;
+    // Support both old (d.vencedor) and new (d.veredito) formats
+    const v = d.veredito || d.vencedor || {};
+    const hook = v.hook || "";
+    const copy = v.copy || "";
+    const ugc = v.roteiro_ugc || "";
+    const num = v.anuncio_numero;
+    const score = v.pontuacao_final;
+    const frasePrincipal = v.frase_principal || d.motivo || "";
+    const explicacao = v.explicacao_causal || d.motivo || "";
+
     return (
       <div className="space-y-8 animate-fade-in-up">
-        <div className="text-center py-6">
-          <p className="text-xs font-mono uppercase tracking-widest text-zinc-500 mb-4">
-            Este e o anuncio com maior probabilidade de funcionar antes do
-            trafego.
-          </p>
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-sm px-4 py-2">
-            <Trophy
-              className="h-4 w-4 text-amber-400"
-              strokeWidth={1.5}
-            />
-            <span className="text-white font-mono text-sm">
-              Anuncio #{d.vencedor?.anuncio_numero} — Pontuacao:{" "}
-              {d.vencedor?.pontuacao_final}
-            </span>
+        {/* VERDICT FIRST - brutally clear */}
+        <div className="text-center py-8">
+          <p className="text-xs font-mono uppercase tracking-widest text-zinc-600 mb-6">Veredito do Motor de Decisao</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-4">
+            Anuncio Escolhido: Variacao {num}
+          </h2>
+          <p className="text-zinc-300 text-sm max-w-lg mx-auto">{frasePrincipal}</p>
+          {score && (
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-sm px-4 py-2 mt-4">
+              <Trophy className="h-4 w-4 text-amber-400" strokeWidth={1.5} />
+              <span className="text-white font-mono text-sm">Pontuacao: {score}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Causal explanation */}
+        <div className="bg-zinc-900/20 border-l-2 border-white/20 pl-5 py-3">
+          <p className="text-zinc-300 text-sm leading-relaxed">{explicacao}</p>
+        </div>
+
+        {/* Consequences of other choices */}
+        {d.consequencias_outras && d.consequencias_outras.length > 0 && (
+          <div className="bg-red-500/5 border border-red-500/10 rounded-md p-5 space-y-2">
+            <span className="text-xs font-mono text-red-400/70 uppercase tracking-widest">Consequencia de escolher errado</span>
+            {d.consequencias_outras.map((c, i) => (
+              <p key={i} className="text-zinc-400 text-xs">
+                <span className="text-red-400">Variacao {c.anuncio_numero}:</span> {c.consequencia}
+              </p>
+            ))}
           </div>
-          <div className="flex items-center justify-center gap-3 mt-3">
-            <Button variant="ghost" size="sm" data-testid="share-decision" onClick={handleShare} className="text-zinc-500 hover:text-white text-xs">
-              <Share2 className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />Compartilhar
-            </Button>
+        )}
+
+        {/* Winning ad with copy buttons */}
+        <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] rounded-md overflow-hidden">
+          <div className="bg-white/5 px-6 py-3 border-b border-white/5">
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Este e o anuncio que voce deve usar agora</span>
+          </div>
+          <div className="p-8 space-y-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1"><InfoBlock label="Hook" value={hook} highlight /></div>
+              <Button variant="ghost" size="icon" data-testid="copy-hook-decision" onClick={() => copyText(hook, "hook")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+                {copied === "hook" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+            <Separator className="bg-zinc-800/50" />
+            <div className="flex items-start justify-between">
+              <div className="flex-1"><InfoBlock label="Copy" value={copy} /></div>
+              <Button variant="ghost" size="icon" data-testid="copy-text-decision" onClick={() => copyText(copy, "copy")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
+                {copied === "copy" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+            <Separator className="bg-zinc-800/50" />
+            <details className="group">
+              <summary className="text-xs font-mono text-zinc-600 uppercase tracking-widest cursor-pointer hover:text-zinc-400">Roteiro UGC</summary>
+              <p className="text-zinc-400 text-xs leading-relaxed whitespace-pre-line mt-2">{ugc}</p>
+            </details>
           </div>
         </div>
 
-        <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] rounded-md p-8 space-y-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1"><InfoBlock label="Hook Vencedor" value={d.vencedor?.hook} highlight /></div>
-            <Button variant="ghost" size="icon" data-testid="copy-hook-decision" onClick={() => copyText(d.vencedor?.hook, "hook")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
-              {copied === "hook" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+        {/* Investment recommendation */}
+        {d.investimento_recomendacao && (
+          <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-md p-5">
+            <span className="text-xs font-mono text-emerald-400/70 uppercase tracking-widest block mb-2">Se estivesse investindo R$2.000</span>
+            <p className="text-zinc-300 text-sm">{d.investimento_recomendacao}</p>
           </div>
-          <Separator className="bg-zinc-800/50" />
-          <div className="flex items-start justify-between">
-            <div className="flex-1"><InfoBlock label="Copy Final" value={d.vencedor?.copy} /></div>
-            <Button variant="ghost" size="icon" data-testid="copy-text-decision" onClick={() => copyText(d.vencedor?.copy, "copy")} className="text-zinc-500 hover:text-white ml-2 shrink-0">
-              {copied === "copy" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
-          <Separator className="bg-zinc-800/50" />
-          <div className="space-y-1">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-              Roteiro UGC
-            </span>
-            <p className="text-zinc-400 text-xs leading-relaxed whitespace-pre-line">
-              {d.vencedor?.roteiro_ugc}
-            </p>
-          </div>
-        </div>
+        )}
 
+        {/* Next step */}
+        {d.proximo_passo && (
+          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-5">
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-2">Proximo passo recomendado</span>
+            <p className="text-white text-sm font-medium">{d.proximo_passo.acao}</p>
+            <p className="text-zinc-500 text-xs mt-1">Motivo: {d.proximo_passo.motivo}</p>
+          </div>
+        )}
+
+        {/* Weaknesses + improvement */}
         <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-4">
-          <InfoBlock label="Motivo da Escolha" value={d.motivo} />
           <div className="space-y-2">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-              Fraquezas Detectadas
-            </span>
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Fraquezas detectadas</span>
             <div className="flex flex-wrap gap-2">
               {(d.fraquezas || []).map((f, i) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="text-amber-400 border-amber-400/30 text-xs"
-                >
-                  {f}
-                </Badge>
+                <Badge key={i} variant="outline" className="text-amber-400 border-amber-400/30 text-xs">{f}</Badge>
               ))}
             </div>
           </div>
-          <InfoBlock label="Sugestao de Melhoria" value={d.sugestao_melhoria} />
+          <InfoBlock label="Sugestao de melhoria" value={d.sugestao_melhoria} />
         </div>
 
+        {/* LP Structure */}
         {d.estrutura_lp && (
-          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-4">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-              Estrutura de LP Sugerida
-            </span>
-            <p className="text-white font-medium text-sm">
-              {d.estrutura_lp.headline}
-            </p>
-            <p className="text-zinc-400 text-sm">
-              {d.estrutura_lp.subheadline}
-            </p>
+          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-3">
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Estrutura de LP sugerida</span>
+            <p className="text-white font-medium text-sm">{d.estrutura_lp.headline}</p>
+            <p className="text-zinc-400 text-sm">{d.estrutura_lp.subheadline}</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {(d.estrutura_lp.secoes || []).map((s, i) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="text-zinc-400 border-zinc-800 text-xs"
-                >
-                  {s}
-                </Badge>
+                <Badge key={i} variant="outline" className="text-zinc-400 border-zinc-800 text-xs">{s}</Badge>
               ))}
             </div>
           </div>
@@ -955,51 +975,81 @@ export default function AnalysisFlow() {
 
         {d.publico_compativel && (
           <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-2">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-              Publico Mais Compativel
-            </span>
-            <p className="text-zinc-300 text-sm leading-relaxed">
-              {d.publico_compativel}
-            </p>
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Publico mais compativel</span>
+            <p className="text-zinc-300 text-sm leading-relaxed">{d.publico_compativel}</p>
           </div>
         )}
 
+        {/* Ranking */}
         {d.ranking && (
           <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6 space-y-3">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-              Ranking
-            </span>
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Ranking</span>
             {d.ranking.map((r, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between py-2"
-              >
-                <span className="text-zinc-400 text-sm">
-                  Anuncio #{r.anuncio_numero}
-                </span>
+              <div key={i} className="flex items-center justify-between py-2">
+                <span className="text-zinc-400 text-sm">Anuncio #{r.anuncio_numero}</span>
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white/80 rounded-full transition-all duration-700"
-                      style={{ width: `${r.pontuacao}%` }}
-                    />
+                    <div className="h-full bg-white/80 rounded-full transition-all duration-700" style={{ width: `${r.pontuacao}%` }} />
                   </div>
-                  <span className="text-white text-sm font-mono w-12 text-right">
-                    {r.pontuacao}
-                  </span>
+                  <span className="text-white text-sm font-mono w-12 text-right">{r.pontuacao}</span>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <Button
-          data-testid="back-to-dashboard"
-          onClick={() => navigate("/")}
-          className="w-full bg-transparent border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-12"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Painel
-        </Button>
+        {/* Loop system message */}
+        <div className="text-center py-2">
+          <p className="text-zinc-600 text-xs italic">O sistema continuara aprendendo se voce gerar novas versoes.</p>
+        </div>
+
+        {/* Action buttons - NEVER "voltar" */}
+        <div className="space-y-3">
+          <Button
+            data-testid="use-this-ad"
+            onClick={handleShare}
+            className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 rounded-sm h-12 font-semibold"
+          >
+            <Share2 className="mr-2 h-4 w-4" /> Usar este anuncio
+          </Button>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              data-testid="improve-ad"
+              onClick={handleImprove}
+              variant="outline"
+              className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11"
+            >
+              Melhorar anuncio
+            </Button>
+            <Button
+              data-testid="new-variation"
+              onClick={handleImprove}
+              variant="outline"
+              className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11"
+            >
+              Testar nova variacao
+            </Button>
+          </div>
+
+          {(d.melhorias_possiveis || []).length > 0 && (
+            <div className="space-y-2 pt-2">
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block">Proximos testes recomendados</span>
+              <div className="flex flex-wrap gap-2">
+                {d.melhorias_possiveis.map((m, i) => (
+                  <button
+                    key={i}
+                    data-testid={`improvement-${i}`}
+                    onClick={handleImprove}
+                    className="text-xs px-3 py-1.5 rounded-sm bg-zinc-900/50 border border-zinc-800/50 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all duration-200 cursor-pointer"
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
