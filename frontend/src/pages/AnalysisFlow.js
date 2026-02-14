@@ -596,7 +596,7 @@ export default function AnalysisFlow() {
           {loading ? (
             <>
               <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              Gerando Variacoes de Anuncios...
+              {loadingMessage}
             </>
           ) : (
             <>
