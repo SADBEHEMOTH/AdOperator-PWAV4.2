@@ -1,0 +1,130 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "AdOperator",
+      "metaphor": "The Decision Engine / The Darkroom",
+      "vibe": "Precision, Silence, Focus, Authority",
+      "description": "A dark, minimalist, distraction-free environment where raw product data is processed into high-performance ad copy. It feels like a high-end audio mastering console or a tactical command terminal."
+    },
+    "theme": {
+      "mode": "dark",
+      "primary_palette": {
+        "background": "#09090b",
+        "surface": "#121212",
+        "surface_highlight": "#1E1E20",
+        "text_primary": "#EDEDED",
+        "text_secondary": "#A1A1AA",
+        "border": "#27272a"
+      },
+      "functional_colors": {
+        "accent": "#FFFFFF",
+        "success": "#10B981",
+        "processing": "#F59E0B",
+        "error": "#EF4444",
+        "selection_glow": "0 0 20px rgba(255,255,255,0.15)"
+      }
+    },
+    "typography": {
+      "font_family_heading": "Manrope, sans-serif",
+      "font_family_body": "Inter, sans-serif",
+      "font_family_code": "JetBrains Mono, monospace",
+      "google_fonts_import": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;600;800&display=swap",
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-extrabold tracking-tight",
+        "h2": "text-2xl md:text-3xl font-semibold tracking-tight",
+        "h3": "text-xl font-medium tracking-normal",
+        "body": "text-base leading-relaxed text-zinc-300",
+        "label": "text-xs font-mono uppercase tracking-widest text-zinc-500"
+      }
+    },
+    "layout_strategy": {
+      "container_width": "max-w-3xl",
+      "alignment": "center",
+      "spacing_scale": "generous",
+      "grid_system": "single-column-focus",
+      "z_index_layers": {
+        "base": 0,
+        "overlay": 50,
+        "modal": 100,
+        "toast": 200
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 rounded-sm font-semibold px-8 py-3",
+        "secondary": "bg-transparent border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm px-6 py-3",
+        "ghost": "text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-sm px-4 py-2"
+      },
+      "cards": {
+        "glass": "bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-lg p-8",
+        "solid": "bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-6 hover:border-zinc-700 transition-colors duration-300",
+        "active": "border-zinc-600 bg-zinc-900/80 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+      },
+      "inputs": {
+        "default": "bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white/50 focus:ring-0 rounded-sm min-h-[50px]",
+        "textarea": "bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white/50 focus:ring-0 rounded-sm min-h-[150px] resize-none"
+      },
+      "stepper": {
+        "container": "flex items-center justify-between w-full mb-12",
+        "dot_active": "w-3 h-3 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]",
+        "dot_inactive": "w-2 h-2 bg-zinc-800 rounded-full",
+        "line": "h-[1px] flex-1 bg-zinc-900 mx-4"
+      }
+    },
+    "motion": {
+      "transitions": {
+        "default": "transition-all duration-300 ease-out",
+        "slow": "transition-all duration-700 ease-[0.22, 1, 0.36, 1]"
+      },
+      "animations": {
+        "fade_in": "animate-in fade-in duration-500",
+        "slide_up": "animate-in slide-in-from-bottom-4 duration-500 fade-in",
+        "pulse_slow": "animate-pulse duration-3000"
+      }
+    },
+    "visual_enhancers": {
+      "noise": "bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none fixed inset-0 z-[9999]",
+      "glow": "absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+    },
+    "assets": {
+      "images": {
+        "login_bg": "https://images.unsplash.com/photo-1743778812446-89def1e784cf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRhcmslMjBnZW9tZXRyaWMlMjB0ZXh0dXJlJTIwbWluaW1hbCUyMGJsYWNrJTIwYW5kJTIwd2hpdGV8ZW58MHx8fHwxNzcxMDk3NjMwfDA&ixlib=rb-4.1.0&q=85",
+        "texture_1": "https://images.unsplash.com/photo-1760282853818-cd54418bc8bd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBnZW9tZXRyaWMlMjB0ZXh0dXJlJTIwbWluaW1hbCUyMGJsYWNrJTIwYW5kJTIwd2hpdGV8ZW58MHx8fHwxNzcxMDk3NjMwfDA&ixlib=rb-4.1.0&q=85",
+        "texture_2": "https://images.unsplash.com/photo-1517241034903-9a4c3ab12f00?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGRhcmslMjBnZW9tZXRyaWMlMjB0ZXh0dXJlJTIwbWluaW1hbCUyMGJsYWNrJTIwYW5kJTIwd2hpdGV8ZW58MHx8fHwxNzcxMDk3NjMwfDA&ixlib=rb-4.1.0&q=85"
+      },
+      "icons": "Use 'lucide-react' for all UI icons (ChevronRight, Check, X, Loader2, Play, Pause, RotateCcw). Use stroke-width={1.5} for a thin, elegant look."
+    }
+  },
+  "implementation_instructions": {
+    "global_css": {
+      "path": "/app/frontend/src/index.css",
+      "instruction": "Replace the entire content with a Tailwind-based dark theme reset. Add @import for Google Fonts. Set body bg to #09090b and text to #EDEDED. Add a global '.noise' class."
+    },
+    "tailwind_config": {
+      "path": "/app/frontend/tailwind.config.js",
+      "instruction": "Extend the theme with 'manrope', 'inter', 'jetbrains' font families. Add custom colors for 'zinc-950' if needed (though built-in is fine). Add 'animate-in' keyframes if not present (tailwindcss-animate handles most)."
+    },
+    "layout_rules": {
+      "general": "Do not use sidebars. Use a centered layout (max-w-3xl) for the main application flow. The header should be minimal (Logo left, User right).",
+      "stepper": "The stepper must be visible on all 'Process' pages (Input -> Strategy -> Ads -> Sim -> Decision). It should be static at the top.",
+      "cards": "Avoid using heavy background colors for cards. Use borders and transparency. The 'Winner' card can have a subtle white glow."
+    },
+    "accessibility": {
+      "focus": "All interactive elements must have a visible focus ring (ring-offset-2 ring-2 ring-zinc-500).",
+      "contrast": "Ensure text-secondary (#A1A1AA) is only used for non-critical labels. Main content must be text-primary (#EDEDED)."
+    }
+  },
+  "universal_guidelines": {
+    "do_not": [
+      "DO NOT use gradients for backgrounds (solid dark only).",
+      "DO NOT use 'Inter' for headings (use Manrope).",
+      "DO NOT use rounded-xl or rounded-2xl (keep it sharp/minimal: rounded-sm or rounded-md).",
+      "DO NOT use bright blue/purple primary colors (stick to monochrome + signal colors)."
+    ],
+    "must_do": [
+      "MUST use 'data-testid' on all inputs and buttons.",
+      "MUST use 'sonner' for notifications.",
+      "MUST implement the 'noise' texture overlay for the authentic 'film/darkroom' feel."
+    ]
+  }
+}
