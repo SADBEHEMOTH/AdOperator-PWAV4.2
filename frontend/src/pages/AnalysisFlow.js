@@ -73,6 +73,9 @@ export default function AnalysisFlow() {
   const [loading, setLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState(null);
   const [data, setData] = useState(null);
+  const [mode, setMode] = useState("quick");
+  const [showRefinement, setShowRefinement] = useState(false);
+  const [copied, setCopied] = useState(null);
   const [product, setProduct] = useState({
     nome: "",
     nicho: "",
