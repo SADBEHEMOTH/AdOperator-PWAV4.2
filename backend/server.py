@@ -1459,7 +1459,7 @@ Retorne SOMENTE o JSON."""
             video_size = data.video_size if data.video_size in ["1280x720", "1792x1024", "1024x1792", "1024x1024"] else "1280x720"
             video_duration = data.video_duration if data.video_duration in [4, 8, 12] else 4
 
-            video_prompt = data.prompt or f"Professional ad creative video for '{product['nome']}' in the {product['nicho']} niche. Promise: {product['promessa_principal']}. Hook: {v.get('hook', '')}. Style: modern, clean, suitable for social media ads."
+            video_prompt = data.prompt or build_contextual_prompt(product, decision, strategy, data.hook_template or "", "", "sora_video")
 
             def _generate_video():
                 video_gen = OpenAIVideoGeneration(api_key=EMERGENT_KEY)
