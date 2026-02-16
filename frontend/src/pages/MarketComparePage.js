@@ -76,9 +76,9 @@ export default function MarketComparePage() {
     try {
       const { data } = await api.post(`/analyses/${id}/market-compare`);
       setResult(data);
-      toast.success("Comparação concluída!");
+      toast.success(t("mkt.done"));
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erro ao comparar com mercado");
+      toast.error(err.response?.data?.detail || t("mkt.error"));
     } finally {
       clearInterval(interval);
       setLoading(false);
