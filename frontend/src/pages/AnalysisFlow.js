@@ -524,24 +524,24 @@ export default function AnalysisFlow() {
           <div className="flex items-center gap-2 mb-2">
             <Brain className="h-4 w-4 text-white" strokeWidth={1.5} />
             <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">
-              Interpretacao Estrategica
+              {t("strategy.title")}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InfoBlock label="Nivel de Consciencia" value={s.nivel_consciencia} />
-            <InfoBlock label="Angulo de Venda" value={s.angulo_venda} />
+            <InfoBlock label={t("strategy.consciousness")} value={s.nivel_consciencia} />
+            <InfoBlock label={t("strategy.angle")} value={s.angulo_venda} />
           </div>
 
           <Separator className="bg-zinc-800/50" />
 
-          <InfoBlock label="Dor Central" value={s.dor_central} />
-          <InfoBlock label="Big Idea" value={s.big_idea} />
-          <InfoBlock label="Mecanismo Percebido" value={s.mecanismo_percebido} />
+          <InfoBlock label={t("strategy.pain")} value={s.dor_central} />
+          <InfoBlock label={t("strategy.big_idea")} value={s.big_idea} />
+          <InfoBlock label={t("strategy.mechanism")} value={s.mecanismo_percebido} />
 
           <div className="space-y-2">
             <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">
-              Objecoes Provaveis
+              {t("strategy.objections")}
             </span>
             <div className="flex flex-wrap gap-2">
               {(s.objecoes || []).map((obj, i) => (
