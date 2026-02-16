@@ -382,7 +382,7 @@ async def scrape_url(url: str) -> dict:
 # --- AI Pipeline Endpoints ---
 
 @api_router.post("/analyses/{analysis_id}/parse")
-async def parse_strategy(analysis_id: str, user=Depends(get_current_user)):
+async def parse_strategy(analysis_id: str, request: Request, user=Depends(get_current_user)):
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
@@ -429,7 +429,7 @@ Promessa principal: {product['promessa_principal']}"""
     return result
 
 @api_router.post("/analyses/{analysis_id}/generate")
-async def generate_ads(analysis_id: str, user=Depends(get_current_user)):
+async def generate_ads(analysis_id: str, request: Request, user=Depends(get_current_user)):
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
@@ -507,7 +507,7 @@ Mecanismo percebido: {strategy.get('mecanismo_percebido', '')}"""
     return result
 
 @api_router.post("/analyses/{analysis_id}/simulate")
-async def simulate_audience(analysis_id: str, user=Depends(get_current_user)):
+async def simulate_audience(analysis_id: str, request: Request, user=Depends(get_current_user)):
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
@@ -572,7 +572,7 @@ Retorne SOMENTE o JSON."""
     return result
 
 @api_router.post("/analyses/{analysis_id}/decide")
-async def decide_winner(analysis_id: str, user=Depends(get_current_user)):
+async def decide_winner(analysis_id: str, request: Request, user=Depends(get_current_user)):
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
@@ -675,7 +675,7 @@ async def improve_analysis(analysis_id: str, user=Depends(get_current_user)):
 # --- Market Comparison Endpoint ---
 
 @api_router.post("/analyses/{analysis_id}/market-compare")
-async def market_compare(analysis_id: str, user=Depends(get_current_user)):
+async def market_compare(analysis_id: str, request: Request, user=Depends(get_current_user)):
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
@@ -782,7 +782,7 @@ Analise o mercado deste nicho e compare com a estratégia do usuário. Gere 5-7 
 # --- Competitor Analysis Endpoint ---
 
 @api_router.post("/competitor/analyze")
-async def analyze_competitor(data: CompetitorURLInput, user=Depends(get_current_user)):
+async def analyze_competitor(data: CompetitorURLInput, request: Request, user=Depends(get_current_user)):
     scraped = await scrape_url(data.url)
 
     system_msg = """Você é um analista estratégico de anúncios digitais.
