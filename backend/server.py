@@ -254,7 +254,9 @@ class CompetitorURLInput(BaseModel):
 class CreativeGenerationInput(BaseModel):
     analysis_id: str
     prompt: Optional[str] = ""
-    provider: str  # "nano_banana" | "gpt_image" | "claude_text"
+    provider: str  # "nano_banana" | "gpt_image" | "claude_text" | "sora_video"
+    video_size: Optional[str] = "1280x720"
+    video_duration: Optional[int] = 4
 
 class PushSubscriptionInput(BaseModel):
     endpoint: str
