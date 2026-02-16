@@ -142,7 +142,7 @@ export default function AnalysisFlow() {
       }));
       setStep(1);
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erro ao criar analise");
+      toast.error(err.response?.data?.detail || t("flow.error_create"));
     } finally {
       cleanup();
       setLoading(false);
