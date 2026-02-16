@@ -20,6 +20,7 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
+    <LanguageProvider>
     <AuthProvider>
       <BrowserRouter>
         <div className="min-h-screen bg-[#09090b] relative">
@@ -48,6 +49,7 @@ function App() {
         </div>
       </BrowserRouter>
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 
