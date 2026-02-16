@@ -31,6 +31,7 @@ export default function CompetitorAnalysisPage() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     api.get("/competitor/analyses")
