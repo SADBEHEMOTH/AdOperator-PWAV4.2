@@ -228,6 +228,9 @@ async def get_analysis(analysis_id: str, user=Depends(get_current_user)):
 
 # --- Compliance & Sharing Endpoints ---
 
+class CompetitorURLInput(BaseModel):
+    url: str
+
 class ComplianceCheckInput(BaseModel):
     text: str
 
