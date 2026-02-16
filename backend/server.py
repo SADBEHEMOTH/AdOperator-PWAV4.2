@@ -1532,7 +1532,15 @@ async def list_creatives(analysis_id: str, user=Depends(get_current_user)):
     items = await db.creatives.find(
         {"analysis_id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     ).sort("created_at", -1).to_list(50)
-    return [item.get("result", item) for item in items]
+    results = []
+    for item in items:
+        r = item.get("result", {})
+        r["version"] = item.get("version", 1)
+        r["hook_template"] = item.get("hook_template")
+        r["parent_creative_id"] = item.get("parent_creative_id")
+        r["created_at"] = item.get("created_at", "")
+        results.append(r)
+    return results
 
 # --- Push Subscription ---
 
