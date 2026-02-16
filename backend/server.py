@@ -1119,7 +1119,7 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
         raise HTTPException(status_code=404, detail="Análise não encontrada")
 
     product = analysis["product"]
-    decision = analysis.get("decision", {})
+    decision = analysis.get("decision") or {}
     v = decision.get("veredito") or decision.get("vencedor") or {}
 
     base_prompt = data.prompt or f"Anúncio profissional para '{product['nome']}' no nicho de {product['nicho']}. Promessa: {product['promessa_principal']}. Hook: {v.get('hook', '')}. Estilo: anúncio de tráfego pago, moderno, clean."
