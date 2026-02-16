@@ -156,7 +156,7 @@ export default function CompetitorAnalysisPage() {
               {loading ? (
                 <Loader2 className="animate-spin h-4 w-4" />
               ) : (
-                <>Analisar</>
+                <>{t("comp.analyze")}</>
               )}
             </Button>
           </div>
