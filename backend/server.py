@@ -1503,10 +1503,16 @@ Retorne SOMENTE o JSON."""
         "analysis_id": data.analysis_id,
         "provider": data.provider,
         "result": result,
+        "version": version,
+        "version_group": version_group,
+        "parent_creative_id": data.parent_creative_id or None,
+        "hook_template": data.hook_template or None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.creatives.insert_one(doc)
 
+    result["version"] = version
+    result["hook_template"] = data.hook_template or None
     return result
 
 @api_router.get("/creatives/file/{creative_id}")
