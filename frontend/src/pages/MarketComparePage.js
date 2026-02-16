@@ -135,7 +135,7 @@ export default function MarketComparePage() {
             {product?.nome}
           </h2>
           <p className="text-zinc-500 text-sm mt-1">
-            Veja como o mercado vende no nicho <span className="text-zinc-300">{product?.nicho}</span> e onde você tem vantagem.
+            {t("mkt.desc_prefix")} <span className="text-zinc-300">{product?.nicho}</span> {t("mkt.desc_suffix")}
           </p>
         </div>
 
