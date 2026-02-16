@@ -408,10 +408,10 @@ export default function AnalysisFlow() {
       <div className="flex items-start gap-3 bg-amber-500/5 border border-amber-500/20 rounded-sm p-3">
         <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
         <div>
-          <p className="text-amber-400 text-xs font-medium">Risco de bloqueio detectado</p>
+          <p className="text-amber-400 text-xs font-medium">{t("flow.compliance_risk")}</p>
           <p className="text-zinc-400 text-xs mt-1">
-            Termos como {complianceWarnings.map((t, i) => (
-              <span key={t} className="text-amber-300 font-mono">{i > 0 && ", "}&#34;{t}&#34;</span>
+            Termos como {complianceWarnings.map((tw, i) => (
+              <span key={tw} className="text-amber-300 font-mono">{i > 0 && ", "}&#34;{tw}&#34;</span>
             ))} podem causar reprovacao em plataformas de anuncio.
           </p>
         </div>
@@ -419,7 +419,7 @@ export default function AnalysisFlow() {
     ) : (
       <div className="flex items-center gap-2 text-zinc-600 text-xs">
         <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} />
-        Evite promessas medicas absolutas. O sistema vai sinalizar risco de bloqueio.
+        {t("flow.compliance_safe")}
       </div>
     )
   );
@@ -434,14 +434,14 @@ export default function AnalysisFlow() {
               data-testid="mode-quick"
               className="text-xs font-mono data-[state=active]:bg-zinc-800 data-[state=active]:text-white"
             >
-              Rapido
+              {t("flow.quick")}
             </TabsTrigger>
             <TabsTrigger
               value="complete"
               data-testid="mode-complete"
               className="text-xs font-mono data-[state=active]:bg-zinc-800 data-[state=active]:text-white"
             >
-              Completo
+              {t("flow.complete")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
