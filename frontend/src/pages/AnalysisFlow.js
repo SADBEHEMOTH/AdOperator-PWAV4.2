@@ -328,7 +328,7 @@ export default function AnalysisFlow() {
     <>
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Publico-Alvo <span className="text-zinc-700">(opcional)</span>
+          {t("flow.audience")} <span className="text-zinc-700">{t("flow.optional")}</span>
         </Label>
         <Input
           data-testid="product-audience"
@@ -341,7 +341,7 @@ export default function AnalysisFlow() {
 
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Beneficios <span className="text-zinc-700">(opcional)</span>
+          {t("flow.benefits")} <span className="text-zinc-700">{t("flow.optional")}</span>
         </Label>
         <Textarea
           data-testid="product-benefits"
@@ -354,7 +354,7 @@ export default function AnalysisFlow() {
 
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Ingredientes / Mecanismo <span className="text-zinc-700">(opcional)</span>
+          {t("flow.mechanism")} <span className="text-zinc-700">{t("flow.optional")}</span>
         </Label>
         <Textarea
           data-testid="product-mechanism"
@@ -367,7 +367,7 @@ export default function AnalysisFlow() {
 
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Tom Desejado <span className="text-zinc-700">(opcional)</span>
+          {t("flow.tone")} <span className="text-zinc-700">{t("flow.optional")}</span>
         </Label>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {TONE_CHIPS.map((chip) => (
