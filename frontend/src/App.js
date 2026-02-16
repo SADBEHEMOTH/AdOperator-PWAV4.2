@@ -6,6 +6,8 @@ import DashboardPage from "@/pages/DashboardPage";
 import AnalysisFlow from "@/pages/AnalysisFlow";
 import ResultPage from "@/pages/ResultPage";
 import PublicResultPage from "@/pages/PublicResultPage";
+import CompetitorAnalysisPage from "@/pages/CompetitorAnalysisPage";
+import MarketComparePage from "@/pages/MarketComparePage";
 import "@/App.css";
 
 const ProtectedRoute = ({ children }) => {
