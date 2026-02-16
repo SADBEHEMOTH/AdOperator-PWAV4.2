@@ -124,64 +124,82 @@ export default function DashboardPage() {
           const d = latest.decision;
           const v = d?.veredito || d?.vencedor || {};
           const product = latest.product;
+          const strategy = latest.strategic_analysis;
           const completedCount = analyses.filter(a => a.status === "completed").length;
+          const weaknesses = d?.fraquezas || [];
+          const nextStep = d?.proximo_passo;
           return (
             <div className="mb-8 space-y-4 animate-fade-in-up" data-testid="live-panel">
               {/* Current state block */}
               <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Estado Atual</span>
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Produto Ativo</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <p className="text-zinc-500 text-xs">Produto ativo</p>
+                      <p className="text-zinc-500 text-xs">Produto</p>
                       <p className="text-white text-sm font-medium">{product?.nome}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-zinc-500 text-xs">Anuncio atual</p>
-                      <p className="text-white text-sm font-medium">{v.hipotese || `Variacao ${v.anuncio_numero}`}</p>
+                    <div>
+                      <p className="text-zinc-500 text-xs">Estrategia Atual</p>
+                      <p className="text-white text-sm font-medium">{strategy?.angulo_venda || v.hipotese || `Variacao ${v.anuncio_numero}`}</p>
                     </div>
                   </div>
+                  {weaknesses.length > 0 && (
+                    <div className="bg-amber-500/5 border border-amber-500/15 rounded-sm p-3">
+                      <p className="text-amber-400/80 text-xs font-mono uppercase tracking-widest mb-1">Maior Fraqueza</p>
+                      <p className="text-zinc-300 text-xs">{weaknesses[0]}</p>
+                    </div>
+                  )}
+                  {nextStep && (
+                    <div className="bg-zinc-950/30 rounded-sm p-3">
+                      <p className="text-zinc-600 text-xs font-mono uppercase tracking-widest mb-1">Próxima Ação Recomendada</p>
+                      <p className="text-zinc-300 text-xs">{nextStep.acao}</p>
+                    </div>
+                  )}
                   {v.frase_principal && (
                     <p className="text-zinc-400 text-xs border-l-2 border-zinc-800 pl-3">{v.frase_principal}</p>
                   )}
-                  <div className="flex items-center gap-3">
-                    <Button
-                      data-testid="improve-from-dashboard"
-                      size="sm"
-                      onClick={() => navigate(`/analysis/${latest.id}`)}
-                      className="bg-white text-black hover:bg-zinc-200 shadow-[0_0_10px_rgba(255,255,255,0.08)] rounded-sm font-semibold text-xs"
-                    >
-                      Melhorar anuncio <ArrowRight className="ml-1.5 h-3 w-3" />
-                    </Button>
-                    {completedCount > 1 && (
-                      <span className="text-emerald-400/60 text-xs flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" /> {completedCount} versoes geradas
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
 
-              {/* Alerts block */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-4 w-4 text-amber-500/60 shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div>
-                    <p className="text-zinc-400 text-xs">Publico cetico tende a ignorar apos repeticao</p>
-                    <p className="text-zinc-600 text-xs mt-0.5">Considere testar nova abordagem</p>
-                  </div>
-                </div>
-                <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4 flex items-start gap-3">
-                  <Zap className="h-4 w-4 text-emerald-500/60 shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div>
-                    <p className="text-zinc-400 text-xs">Versao com erro comum pode performar melhor</p>
-                    <p className="text-zinc-600 text-xs mt-0.5">Teste provocacao direta</p>
-                  </div>
-                </div>
+              {/* 3 Action Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Button
+                  data-testid="improve-from-dashboard"
+                  onClick={() => navigate(`/analysis/${latest.id}`)}
+                  className="bg-white text-black hover:bg-zinc-200 shadow-[0_0_10px_rgba(255,255,255,0.08)] rounded-sm font-semibold text-xs h-11"
+                >
+                  <Zap className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  Melhorar anuncio
+                </Button>
+                <Button
+                  data-testid="market-compare-dashboard"
+                  onClick={() => navigate(`/analysis/${latest.id}/market`)}
+                  variant="outline"
+                  className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white rounded-sm font-semibold text-xs h-11"
+                >
+                  <BarChart3 className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  Comparar com mercado
+                </Button>
+                <Button
+                  data-testid="competitor-analysis-dashboard"
+                  onClick={() => navigate("/competitor")}
+                  variant="outline"
+                  className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white rounded-sm font-semibold text-xs h-11"
+                >
+                  <Search className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  Analisar concorrente
+                </Button>
               </div>
+
+              {completedCount > 1 && (
+                <div className="flex items-center gap-1 text-emerald-400/60 text-xs">
+                  <TrendingUp className="h-3 w-3" /> {completedCount} versoes geradas
+                </div>
+              )}
 
               <Separator className="bg-zinc-800/30" />
               <div className="flex items-center justify-between">
