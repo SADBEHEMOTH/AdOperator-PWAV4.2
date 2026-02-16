@@ -250,7 +250,7 @@ export default function MarketComparePage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
-                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Exemplos do Mercado</span>
+                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">{t("mkt.examples")}</span>
                 </div>
                 {result.anuncios_mercado.map((ad, i) => (
                   <div key={i} className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-5 space-y-3">
