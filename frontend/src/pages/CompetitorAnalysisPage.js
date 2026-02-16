@@ -123,13 +123,13 @@ export default function CompetitorAnalysisPage() {
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <Search className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
-            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Analisar Concorrente</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">{t("comp.title")}</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
-            Decodifique a estratégia
+            {t("comp.headline")}
           </h2>
           <p className="text-zinc-500 text-sm mt-1">
-            Cole a URL de um anúncio ou landing page do concorrente.
+            {t("comp.desc")}
           </p>
         </div>
 
