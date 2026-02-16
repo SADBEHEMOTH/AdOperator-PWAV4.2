@@ -1412,10 +1412,15 @@ Retorne SOMENTE o JSON."""
 
 @api_router.get("/creatives/file/{creative_id}")
 async def get_creative_file(creative_id: str):
-    filepath = GENERATED_DIR / f"{creative_id}.png"
-    if not filepath.exists():
-        raise HTTPException(status_code=404, detail="Criativo não encontrado")
-    return FileResponse(filepath, media_type="image/png")
+    # Check for image (png)
+    filepath_png = GENERATED_DIR / f"{creative_id}.png"
+    if filepath_png.exists():
+        return FileResponse(filepath_png, media_type="image/png")
+    # Check for video (mp4)
+    filepath_mp4 = GENERATED_DIR / f"{creative_id}.mp4"
+    if filepath_mp4.exists():
+        return FileResponse(filepath_mp4, media_type="video/mp4")
+    raise HTTPException(status_code=404, detail="Criativo não encontrado")
 
 @api_router.get("/creatives/list/{analysis_id}")
 async def list_creatives(analysis_id: str, user=Depends(get_current_user)):
