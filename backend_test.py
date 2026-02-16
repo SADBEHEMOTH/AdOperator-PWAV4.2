@@ -7,7 +7,7 @@ import json
 from typing import Dict, Any, Optional
 
 class AdOperatorAPITester:
-    def __init__(self, base_url="https://strategy-engine-8.preview.emergentagent.com"):
+    def __init__(self, base_url="https://ad-operator.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.test_analysis_id = None
