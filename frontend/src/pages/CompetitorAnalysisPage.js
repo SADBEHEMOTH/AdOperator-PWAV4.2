@@ -260,7 +260,7 @@ export default function CompetitorAnalysisPage() {
         {!result && history.length > 0 && (
           <div className="space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Análises anteriores</span>
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">{t("comp.history")}</span>
               <button
                 data-testid="toggle-competitor-history"
                 onClick={() => setShowHistory(!showHistory)}
