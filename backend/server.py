@@ -259,6 +259,8 @@ class CreativeGenerationInput(BaseModel):
     provider: str  # "nano_banana" | "gpt_image" | "claude_text" | "sora_video"
     video_size: Optional[str] = "1280x720"
     video_duration: Optional[int] = 4
+    hook_template: Optional[str] = ""  # "vsl" | "ugc" | "before_after" | "depoimento" | "problema_solucao" | ""
+    parent_creative_id: Optional[str] = ""  # For versioning - ID of the creative being iterated on
 
 class PushSubscriptionInput(BaseModel):
     endpoint: str
