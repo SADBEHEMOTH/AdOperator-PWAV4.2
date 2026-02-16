@@ -992,17 +992,17 @@ export default function AnalysisFlow() {
 
         {/* Loop system message */}
         <div className="text-center py-2">
-          <p className="text-zinc-600 text-xs italic">O sistema continuara aprendendo se voce gerar novas versoes.</p>
+          <p className="text-zinc-600 text-xs italic">{t("dec.loop_msg")}</p>
         </div>
 
-        {/* Action buttons - NEVER "voltar" */}
+        {/* Action buttons - ALWAYS actionable, NEVER dead end */}
         <div className="space-y-3">
           <Button
             data-testid="use-this-ad"
             onClick={handleShare}
             className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 rounded-sm h-12 font-semibold"
           >
-            <Share2 className="mr-2 h-4 w-4" /> Usar este anuncio
+            <Share2 className="mr-2 h-4 w-4" /> {t("dec.use_ad")}
           </Button>
 
           <div className="grid grid-cols-2 gap-3">
@@ -1012,21 +1012,43 @@ export default function AnalysisFlow() {
               variant="outline"
               className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11"
             >
-              Melhorar anuncio
+              {t("dec.improve")}
             </Button>
             <Button
-              data-testid="new-variation"
-              onClick={handleImprove}
+              data-testid="generate-creative-from-decision"
+              onClick={() => navigate(`/analysis/${analysisId}/creative`)}
               variant="outline"
               className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11"
             >
-              Testar nova variacao
+              <Palette className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
+              Gerar Criativo
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              data-testid="compare-market-from-decision"
+              onClick={() => navigate(`/analysis/${analysisId}/market`)}
+              variant="outline"
+              className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11 text-xs"
+            >
+              <BarChart3 className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
+              {t("panel.compare_market")}
+            </Button>
+            <Button
+              data-testid="analyze-competitor-from-decision"
+              onClick={() => navigate("/competitor")}
+              variant="outline"
+              className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-all duration-300 rounded-sm h-11 text-xs"
+            >
+              <SearchIcon className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
+              {t("panel.analyze_competitor")}
             </Button>
           </div>
 
           {(d.melhorias_possiveis || []).length > 0 && (
             <div className="space-y-2 pt-2">
-              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block">Proximos testes recomendados</span>
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block">{t("dec.next_tests")}</span>
               <div className="flex flex-wrap gap-2">
                 {d.melhorias_possiveis.map((m, i) => (
                   <button
