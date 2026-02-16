@@ -1,9 +1,11 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-
-const STEP_LABELS = ["Produto", "Estratégia", "Anúncios", "Simulação", "Decisão"];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Stepper({ currentStep = 0 }) {
+  const { t } = useLanguage();
+  const STEP_LABELS = [t("step.product"), t("step.strategy"), t("step.ads"), t("step.simulation"), t("step.decision")];
+
   return (
     <div className="flex items-center justify-between w-full mb-12" data-testid="stepper">
       {STEP_LABELS.map((label, i) => (
