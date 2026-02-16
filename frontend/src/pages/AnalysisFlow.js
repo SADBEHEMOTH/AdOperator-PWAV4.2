@@ -467,7 +467,7 @@ export default function AnalysisFlow() {
         <div className="space-y-3">
           <div className="flex items-center justify-center gap-2 text-zinc-600 text-xs">
             <Clock className="h-3 w-3" strokeWidth={1.5} />
-            <span>Leva ~45s para analise completa</span>
+            <span>{t("flow.time_estimate")}</span>
           </div>
 
           <Button
