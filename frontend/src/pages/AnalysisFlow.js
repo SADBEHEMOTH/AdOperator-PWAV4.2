@@ -269,7 +269,7 @@ export default function AnalysisFlow() {
     <>
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Nome do Produto
+          {t("flow.product_name")}
         </Label>
         <Input
           data-testid="product-name"
@@ -283,7 +283,7 @@ export default function AnalysisFlow() {
 
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Nicho
+          {t("flow.niche")}
         </Label>
         <Input
           data-testid="product-niche"
@@ -297,7 +297,7 @@ export default function AnalysisFlow() {
 
       <div className="space-y-2">
         <Label className="text-zinc-400 text-xs uppercase tracking-widest font-mono">
-          Promessa Principal
+          {t("flow.main_promise")}
         </Label>
         <Textarea
           data-testid="product-promise"
