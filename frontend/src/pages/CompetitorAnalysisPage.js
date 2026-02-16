@@ -65,9 +65,9 @@ export default function CompetitorAnalysisPage() {
       const { data } = await api.post("/competitor/analyze", { url: url.trim() });
       setResult(data);
       setHistory((prev) => [{ id: data.id, url: url.trim(), result: data, created_at: new Date().toISOString() }, ...prev]);
-      toast.success("Análise concluída!");
+      toast.success(t("comp.done"));
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erro ao analisar URL");
+      toast.error(err.response?.data?.detail || t("comp.error"));
     } finally {
       clearInterval(interval);
       setLoading(false);
