@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -18,10 +18,9 @@ export default function LoginPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) navigate("/");
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
