@@ -41,7 +41,11 @@ Criar uma aplicação web chamada "AdOperator" que transforma a descrição de u
 - [x] Geração de vídeo (Sora 2) - até 12s, múltiplos formatos
 - [x] Campo de prompt personalizado
 - [x] Dicas de criativos (VSL, UGC, Produto em Ação, Estático)
-- [x] Galeria de criativos anteriores
+- [x] Hooks Contextuais (VSL, UGC, Before/After, Depoimento, Problema-Solução)
+- [x] Prompts contextuais: combina dados do produto, estratégia, decisão e hook template
+- [x] Histórico de versões: versionamento, iteração sobre criativos anteriores
+- [x] Painel de detalhes: visualização completa com prompt, metadata, download
+- [x] Galeria de criativos com filtro por provedor e versão
 
 ### Exportação e Compartilhamento
 - [x] Compartilhamento via link público
@@ -66,4 +70,3 @@ Criar uma aplicação web chamada "AdOperator" que transforma a descrição de u
 - [ ] Refatorar AnalysisFlow.js em componentes menores
 - [ ] Análise visual com pHash em imagens de concorrentes
 - [ ] Notificações push reais (VAPID keys)
-- [ ] Geração de vídeo com hooks contextuais
