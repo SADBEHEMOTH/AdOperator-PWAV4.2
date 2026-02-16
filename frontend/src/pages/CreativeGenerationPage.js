@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ArrowLeft,
   Loader2,
@@ -18,12 +26,39 @@ import {
   ChevronRight,
   Download,
   RefreshCw,
+  Video,
+  Info,
+  Clock,
 } from "lucide-react";
 
-const PROVIDERS = [
+const IMAGE_PROVIDERS = [
   { id: "nano_banana", label: "Nano Banana", desc: "Gemini", icon: Sparkles, color: "text-purple-400", borderColor: "border-purple-400/20 hover:border-purple-400/50" },
   { id: "gpt_image", label: "GPT Image", desc: "OpenAI", icon: ImageIcon, color: "text-emerald-400", borderColor: "border-emerald-400/20 hover:border-emerald-400/50" },
   { id: "claude_text", label: "Briefing Visual", desc: "Claude", icon: FileText, color: "text-blue-400", borderColor: "border-blue-400/20 hover:border-blue-400/50" },
+];
+
+const VIDEO_PROVIDERS = [
+  { id: "sora_video", label: "Sora 2", desc: "OpenAI", icon: Video, color: "text-amber-400", borderColor: "border-amber-400/20 hover:border-amber-400/50" },
+];
+
+const VIDEO_SIZES = [
+  { value: "1280x720", label: "Paisagem (1280x720)" },
+  { value: "1024x1024", label: "Quadrado (1024x1024)" },
+  { value: "1024x1792", label: "Retrato/Stories (1024x1792)" },
+  { value: "1792x1024", label: "Widescreen (1792x1024)" },
+];
+
+const VIDEO_DURATIONS = [
+  { value: "4", label: "4 segundos" },
+  { value: "8", label: "8 segundos" },
+  { value: "12", label: "12 segundos" },
+];
+
+const CREATIVE_TIPS = [
+  { title: "VSL (Video Sales Letter)", tip: "Comece com um gancho forte nos primeiros 3s. Use texto sobreposto e urgência visual." },
+  { title: "UGC (User Generated)", tip: "Simule depoimento real. Câmera frontal, iluminação natural, tom conversacional." },
+  { title: "Produto em Ação", tip: "Mostre o produto sendo usado. Before/After funciona bem para conversão." },
+  { title: "Anúncio Estático", tip: "Imagem clean com headline forte, cor contrastante no CTA, pouco texto." },
 ];
 
 export default function CreativeGenerationPage() {
@@ -32,11 +67,15 @@ export default function CreativeGenerationPage() {
   const { t } = useLanguage();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mediaType, setMediaType] = useState("image");
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [videoSize, setVideoSize] = useState("1280x720");
+  const [videoDuration, setVideoDuration] = useState("4");
   const [result, setResult] = useState(null);
   const [creatives, setCreatives] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
+  const [showTips, setShowTips] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -54,14 +93,22 @@ export default function CreativeGenerationPage() {
     setResult(null);
 
     try {
-      const { data } = await api.post("/creatives/generate", {
+      const payload = {
         analysis_id: id,
         provider: selectedProvider,
         prompt: customPrompt || "",
+      };
+      if (selectedProvider === "sora_video") {
+        payload.video_size = videoSize;
+        payload.video_duration = parseInt(videoDuration);
+      }
+
+      const { data } = await api.post("/creatives/generate", payload, {
+        timeout: selectedProvider === "sora_video" ? 660000 : 120000,
       });
       setResult(data);
       setCreatives((prev) => [data, ...prev]);
-      toast.success("Criativo gerado!");
+      toast.success(selectedProvider === "sora_video" ? "Vídeo gerado!" : "Criativo gerado!");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Erro ao gerar criativo");
     } finally {
@@ -70,6 +117,14 @@ export default function CreativeGenerationPage() {
   };
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+  const activeProviders = mediaType === "image" ? IMAGE_PROVIDERS : VIDEO_PROVIDERS;
+
+  const handleMediaTypeChange = (type) => {
+    setMediaType(type);
+    setSelectedProvider(null);
+    setResult(null);
+  };
 
   if (pageLoading) {
     return (
@@ -107,13 +162,37 @@ export default function CreativeGenerationPage() {
             {product?.nome}
           </h2>
           <p className="text-zinc-500 text-sm mt-1">
-            Escolha um gerador e crie visuais para seu anúncio.
+            Escolha o tipo de mídia e crie visuais para seu anúncio.
           </p>
         </div>
 
+        {/* Media Type Toggle */}
+        <div className="mb-6">
+          <Tabs value={mediaType} onValueChange={handleMediaTypeChange} className="w-auto">
+            <TabsList className="bg-zinc-900/50 border border-zinc-800/50">
+              <TabsTrigger
+                value="image"
+                data-testid="media-type-image"
+                className="text-xs font-mono data-[state=active]:bg-zinc-800 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <ImageIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Imagem
+              </TabsTrigger>
+              <TabsTrigger
+                value="video"
+                data-testid="media-type-video"
+                className="text-xs font-mono data-[state=active]:bg-zinc-800 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <Video className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Vídeo
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         {/* Provider Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          {PROVIDERS.map((p) => (
+        <div className={`grid grid-cols-1 ${mediaType === "image" ? "sm:grid-cols-3" : "sm:grid-cols-1"} gap-3 mb-6`}>
+          {activeProviders.map((p) => (
             <button
               key={p.id}
               data-testid={`provider-${p.id}`}
@@ -129,20 +208,79 @@ export default function CreativeGenerationPage() {
                 <span className="text-white text-sm font-medium">{p.label}</span>
               </div>
               <span className="text-zinc-600 text-xs">{p.desc}</span>
+              {p.id === "sora_video" && (
+                <span className="text-zinc-700 text-xs block mt-0.5">Gere vídeos curtos com IA (até 12s)</span>
+              )}
             </button>
           ))}
         </div>
 
+        {/* Video Options */}
+        {mediaType === "video" && selectedProvider === "sora_video" && (
+          <div className="grid grid-cols-2 gap-3 mb-6 animate-fade-in-up" data-testid="video-options">
+            <div className="space-y-2">
+              <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Formato</span>
+              <Select value={videoSize} onValueChange={setVideoSize}>
+                <SelectTrigger data-testid="video-size-select" className="bg-zinc-950/50 border-zinc-800 text-white rounded-sm h-10 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800">
+                  {VIDEO_SIZES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Duração</span>
+              <Select value={videoDuration} onValueChange={setVideoDuration}>
+                <SelectTrigger data-testid="video-duration-select" className="bg-zinc-950/50 border-zinc-800 text-white rounded-sm h-10 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800">
+                  {VIDEO_DURATIONS.map((d) => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* Custom Prompt */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Textarea
             data-testid="creative-prompt"
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
-            placeholder="Prompt personalizado (opcional) — ex: 'imagem minimalista com fundo escuro, produto centralizado'"
+            placeholder={mediaType === "video"
+              ? "Descreva a cena do vídeo — ex: 'pessoa usando o produto em casa, câmera frontal, iluminação natural'"
+              : "Prompt personalizado (opcional) — ex: 'imagem minimalista com fundo escuro, produto centralizado'"
+            }
             className="bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white/50 focus:ring-0 rounded-sm min-h-[80px] resize-none"
           />
         </div>
+
+        {/* Creative Tips Toggle */}
+        <button
+          data-testid="toggle-creative-tips"
+          onClick={() => setShowTips(!showTips)}
+          className="flex items-center gap-1.5 text-zinc-600 hover:text-zinc-400 text-xs mb-6 transition-colors"
+        >
+          <Info className="h-3.5 w-3.5" strokeWidth={1.5} />
+          {showTips ? "Ocultar dicas" : "Dicas para bons criativos"}
+        </button>
+
+        {showTips && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 animate-fade-in-up">
+            {CREATIVE_TIPS.map((tip, i) => (
+              <div key={i} className="bg-zinc-900/20 border border-zinc-800/30 rounded-sm p-3">
+                <span className="text-white text-xs font-medium block mb-1">{tip.title}</span>
+                <span className="text-zinc-500 text-xs">{tip.tip}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Generate Button */}
         <Button
@@ -154,15 +292,23 @@ export default function CreativeGenerationPage() {
           {loading ? (
             <>
               <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              Gerando criativo...
+              {mediaType === "video" ? "Gerando vídeo (pode levar alguns minutos)..." : "Gerando criativo..."}
             </>
           ) : (
             <>
-              Gerar Criativo
+              {mediaType === "video" ? "Gerar Vídeo" : "Gerar Criativo"}
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
         </Button>
+
+        {/* Video time warning */}
+        {mediaType === "video" && selectedProvider === "sora_video" && !loading && (
+          <div className="flex items-center gap-2 text-zinc-600 text-xs mb-6 -mt-4 justify-center">
+            <Clock className="h-3 w-3" strokeWidth={1.5} />
+            <span>A geração de vídeo pode levar 2-5 minutos</span>
+          </div>
+        )}
 
         {/* Result */}
         {result && (
@@ -177,11 +323,9 @@ export default function CreativeGenerationPage() {
                   className="w-full"
                 />
                 <div className="p-4 flex items-center justify-between">
-                  <div>
-                    <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs">
-                      {PROVIDERS.find((p) => p.id === result.provider)?.label}
-                    </Badge>
-                  </div>
+                  <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs">
+                    {[...IMAGE_PROVIDERS, ...VIDEO_PROVIDERS].find((p) => p.id === result.provider)?.label}
+                  </Badge>
                   <div className="flex items-center gap-2">
                     <a
                       href={`${API_URL}${result.image_url}`}
@@ -195,6 +339,50 @@ export default function CreativeGenerationPage() {
                     </a>
                     <button
                       data-testid="regenerate-creative"
+                      onClick={handleGenerate}
+                      disabled={loading}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                    >
+                      <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Video result */}
+            {result.video_url && (
+              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md overflow-hidden">
+                <video
+                  data-testid="generated-video"
+                  src={`${API_URL}${result.video_url}`}
+                  controls
+                  className="w-full"
+                  autoPlay
+                  muted
+                />
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-amber-400 border-amber-400/30 text-xs">
+                      Sora 2
+                    </Badge>
+                    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">
+                      {result.video_size} | {result.video_duration}s
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`${API_URL}${result.video_url}`}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="download-video"
+                      className="text-zinc-500 hover:text-white transition-colors"
+                    >
+                      <Download className="h-4 w-4" strokeWidth={1.5} />
+                    </a>
+                    <button
+                      data-testid="regenerate-video"
                       onClick={handleGenerate}
                       disabled={loading}
                       className="text-zinc-500 hover:text-white transition-colors"
@@ -243,8 +431,8 @@ export default function CreativeGenerationPage() {
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Elementos Visuais</span>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {briefing.elementos_visuais.map((e, i) => (
-                        <Badge key={i} variant="outline" className="text-zinc-400 border-zinc-800 text-xs">{e}</Badge>
+                      {briefing.elementos_visuais.map((el, i) => (
+                        <Badge key={i} variant="outline" className="text-zinc-400 border-zinc-800 text-xs">{el}</Badge>
                       ))}
                     </div>
                   </div>
@@ -313,6 +501,9 @@ export default function CreativeGenerationPage() {
                   {c.image_url && (
                     <img src={`${API_URL}${c.image_url}`} alt="Criativo" className="w-full h-40 object-cover" />
                   )}
+                  {c.video_url && (
+                    <video src={`${API_URL}${c.video_url}`} className="w-full h-40 object-cover" muted />
+                  )}
                   {c.briefing && (
                     <div className="p-3">
                       <p className="text-zinc-300 text-xs line-clamp-2">{c.briefing.conceito_visual}</p>
@@ -320,7 +511,7 @@ export default function CreativeGenerationPage() {
                   )}
                   <div className="px-3 pb-3 pt-1">
                     <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">
-                      {PROVIDERS.find((p) => p.id === c.provider)?.label || c.provider}
+                      {[...IMAGE_PROVIDERS, ...VIDEO_PROVIDERS].find((p) => p.id === c.provider)?.label || c.provider}
                     </Badge>
                   </div>
                 </div>
