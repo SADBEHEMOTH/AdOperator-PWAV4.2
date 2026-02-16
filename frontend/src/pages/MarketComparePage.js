@@ -144,10 +144,10 @@ export default function MarketComparePage() {
             <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-6 text-center">
               <BarChart3 className="h-8 w-8 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
               <p className="text-zinc-400 text-sm mb-1">
-                O motor vai analisar como o mercado vende no nicho <span className="text-white">{product?.nicho}</span>
+                {t("mkt.scan_info")} <span className="text-white">{product?.nicho}</span>
               </p>
               <p className="text-zinc-600 text-xs">
-                Vai identificar padrões dominantes, anúncios persistentes e comparar com sua estratégia.
+                {t("mkt.scan_detail")}
               </p>
             </div>
 
