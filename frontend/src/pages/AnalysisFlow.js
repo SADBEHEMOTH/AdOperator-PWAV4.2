@@ -483,7 +483,7 @@ export default function AnalysisFlow() {
               </>
             ) : (
               <>
-                Encontrar o melhor anuncio
+                Encontrar o melhor anúncio
                 <ChevronRight className="ml-2 h-4 w-4" />
               </>
             )}
