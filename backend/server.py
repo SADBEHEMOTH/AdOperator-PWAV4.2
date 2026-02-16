@@ -1267,7 +1267,6 @@ def build_contextual_prompt(product: dict, decision: dict, strategy: dict, hook_
     v = decision.get("veredito") or decision.get("vencedor") or {}
 
     hook = v.get("hook", "")
-    copy_text = v.get("copy", "")
     roteiro = v.get("roteiro_ugc", "")
 
     nicho = product.get("nicho", "")
@@ -1339,7 +1338,6 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
     product = analysis["product"]
     decision = analysis.get("decision") or {}
     strategy = analysis.get("strategic_analysis") or {}
-    v = decision.get("veredito") or decision.get("vencedor") or {}
 
     # Build contextual prompt
     base_prompt = build_contextual_prompt(
