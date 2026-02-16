@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Stepper from "@/components/Stepper";
+import LanguageSelector from "@/components/LanguageSelector";
 import {
   Loader2,
   ChevronRight,
