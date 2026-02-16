@@ -39,21 +39,8 @@ import {
   Clock,
 } from "lucide-react";
 
-const STEP_TITLES = [
-  "Descreva o Produto",
-  "Interpretacao Estrategica",
-  "Variacoes de Anuncios",
-  "Simulacao de Publico",
-  "Resultado Final",
-];
-
-const STEP_DESCRIPTIONS = [
-  "Preencha os dados do produto para iniciar a analise.",
-  "O sistema interpretou estrategicamente seu produto.",
-  "3 variacoes de anuncios foram geradas automaticamente.",
-  "4 perfis de publico simulados reagiram aos anuncios.",
-  "O motor de decisao escolheu o melhor anuncio.",
-];
+const getStepTitles = (t) => [t("flow.step1"), t("flow.step2"), t("flow.step3"), t("flow.step4"), t("flow.step5")];
+const getStepDescriptions = (t) => [t("flow.step1_desc"), t("flow.step2_desc"), t("flow.step3_desc"), t("flow.step4_desc"), t("flow.step5_desc")];
 
 const EXAMPLE_PRODUCT = {
   nome: "CapilarMax Pro",
