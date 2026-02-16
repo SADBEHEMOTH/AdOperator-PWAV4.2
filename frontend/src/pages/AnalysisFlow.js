@@ -80,6 +80,10 @@ export default function AnalysisFlow() {
   const [mode, setMode] = useState("quick");
   const [showRefinement, setShowRefinement] = useState(false);
   const [copied, setCopied] = useState(null);
+  const [strategyTable, setStrategyTable] = useState(null);
+  const [strategyTableLoading, setStrategyTableLoading] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [product, setProduct] = useState({
     nome: "",
     nicho: "",
