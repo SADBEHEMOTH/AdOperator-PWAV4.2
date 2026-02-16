@@ -250,7 +250,7 @@ export default function CompetitorAnalysisPage() {
               onClick={handleCreateSuperior}
               className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.12)] transition-all duration-300 rounded-sm h-14 font-bold text-sm tracking-wide"
             >
-              CRIAR VERSÃO SUPERIOR
+              {t("comp.create_superior")}
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
