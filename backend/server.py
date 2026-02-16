@@ -1538,6 +1538,128 @@ async def get_hook_templates():
         ]
     }
 
+
+# --- pHash Visual Analysis ---
+
+async def compute_phash_from_url(image_url: str) -> Optional[str]:
+    """Download an image and compute its perceptual hash."""
+    import imagehash
+    from PIL import Image
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15) as http_client:
+            resp = await http_client.get(image_url, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            })
+            resp.raise_for_status()
+            content_type = resp.headers.get("content-type", "")
+            if "image" not in content_type and not any(image_url.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".gif", ".webp"]):
+                return None
+            img = Image.open(io.BytesIO(resp.content))
+            return str(imagehash.phash(img))
+    except Exception as e:
+        logger.warning(f"pHash computation failed for {image_url}: {e}")
+        return None
+
+
+def hamming_distance(hash1: str, hash2: str) -> int:
+    """Calculate hamming distance between two hex hash strings."""
+    import imagehash
+    h1 = imagehash.hex_to_hash(hash1)
+    h2 = imagehash.hex_to_hash(hash2)
+    return h1 - h2
+
+
+class ImageAnalysisInput(BaseModel):
+    image_urls: List[str]
+    compare_with_analysis_id: Optional[str] = ""
+
+
+@api_router.post("/competitor/image-analysis")
+async def analyze_competitor_images(data: ImageAnalysisInput, user=Depends(get_current_user)):
+    """Analyze competitor images using pHash and compare with user's creatives."""
+    results = []
+
+    # Compute hashes for input images
+    input_hashes = []
+    for url in data.image_urls[:10]:
+        phash = await compute_phash_from_url(url)
+        input_hashes.append({"url": url, "phash": phash})
+        results.append({
+            "url": url,
+            "phash": phash,
+            "status": "ok" if phash else "failed",
+        })
+
+    # Compare with user's creatives if analysis_id provided
+    comparisons = []
+    if data.compare_with_analysis_id:
+        user_creatives = await db.creatives.find(
+            {"analysis_id": data.compare_with_analysis_id, "user_id": user["id"]},
+            {"_id": 0}
+        ).to_list(50)
+
+        for creative in user_creatives:
+            creative_result = creative.get("result", {})
+            creative_id = creative_result.get("id", "")
+            if not creative_id:
+                continue
+
+            # Compute hash for user's creative image
+            creative_path = GENERATED_DIR / f"{creative_id}.png"
+            if not creative_path.exists():
+                continue
+
+            import imagehash
+            from PIL import Image
+            try:
+                img = Image.open(creative_path)
+                creative_hash = str(imagehash.phash(img))
+            except Exception:
+                continue
+
+            # Compare with each competitor image
+            for inp in input_hashes:
+                if not inp["phash"]:
+                    continue
+                distance = hamming_distance(inp["phash"], creative_hash)
+                similarity = max(0, 100 - (distance * 100 / 64))
+                comparisons.append({
+                    "competitor_url": inp["url"],
+                    "creative_id": creative_id,
+                    "creative_provider": creative_result.get("provider", ""),
+                    "creative_version": creative.get("version", 1),
+                    "distance": distance,
+                    "similarity_percent": round(similarity, 1),
+                    "is_similar": distance < 15,
+                })
+
+    # Cross-compare competitor images with each other
+    cross_comparisons = []
+    valid_hashes = [h for h in input_hashes if h["phash"]]
+    for i in range(len(valid_hashes)):
+        for j in range(i + 1, len(valid_hashes)):
+            distance = hamming_distance(valid_hashes[i]["phash"], valid_hashes[j]["phash"])
+            similarity = max(0, 100 - (distance * 100 / 64))
+            cross_comparisons.append({
+                "image_a": valid_hashes[i]["url"],
+                "image_b": valid_hashes[j]["url"],
+                "distance": distance,
+                "similarity_percent": round(similarity, 1),
+                "is_similar": distance < 15,
+            })
+
+    return {
+        "images": results,
+        "creative_comparisons": comparisons,
+        "cross_comparisons": cross_comparisons,
+        "summary": {
+            "total_images": len(data.image_urls),
+            "hashed_successfully": len(valid_hashes),
+            "similar_to_creatives": len([c for c in comparisons if c["is_similar"]]),
+            "similar_cross": len([c for c in cross_comparisons if c["is_similar"]]),
+        },
+    }
+
 @api_router.get("/creatives/list/{analysis_id}")
 async def list_creatives(analysis_id: str, user=Depends(get_current_user)):
     items = await db.creatives.find(
