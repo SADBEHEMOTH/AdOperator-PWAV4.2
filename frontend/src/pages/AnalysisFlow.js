@@ -583,6 +583,114 @@ export default function AnalysisFlow() {
           </div>
         )}
 
+        {/* Strategy Table */}
+        {strategyTable && (
+          <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-6 space-y-5 animate-fade-in-up" data-testid="strategy-table">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-white" strokeWidth={1.5} />
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Estratégia por Perfil de Público</span>
+            </div>
+            <div className="space-y-4">
+              {(strategyTable.perfis || []).map((p, i) => (
+                <div key={i} className="bg-zinc-950/30 rounded-sm p-4 space-y-3 border border-zinc-800/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{p.emoji}</span>
+                    <span className="text-white text-sm font-medium">{p.nome}</span>
+                    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs ml-auto">{p.hook_recomendado}</Badge>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-zinc-600 block mb-0.5">Abordagem</span>
+                      <span className="text-zinc-300">{p.abordagem}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 block mb-0.5">Motivação</span>
+                      <span className="text-zinc-300">{p.motivacao}</span>
+                    </div>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-zinc-600 block mb-0.5">Roteiro</span>
+                    <span className="text-zinc-400">{p.roteiro}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-emerald-400/60 block mb-0.5">Pontos fortes</span>
+                      {(p.pontos_fortes || []).map((pf, j) => (
+                        <span key={j} className="text-zinc-400 block">+ {pf}</span>
+                      ))}
+                    </div>
+                    <div>
+                      <span className="text-amber-400/60 block mb-0.5">Pontos fracos</span>
+                      {(p.pontos_fracos || []).map((pf, j) => (
+                        <span key={j} className="text-zinc-500 block">- {pf}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {strategyTable.recomendacao_geral && (
+              <div className="bg-white/5 border border-white/10 rounded-sm p-3">
+                <span className="text-white text-xs font-medium">{strategyTable.recomendacao_geral}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!strategyTable && !strategyTableLoading && (
+          <Button
+            data-testid="generate-strategy-table"
+            onClick={loadStrategyTable}
+            variant="outline"
+            className="w-full border-dashed border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white transition-all duration-300 rounded-sm h-11 text-xs"
+          >
+            <Users className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
+            Gerar tabela comparativa por perfil de público
+          </Button>
+        )}
+
+        {strategyTableLoading && (
+          <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs py-3 animate-pulse">
+            <Loader2 className="animate-spin h-3 w-3" />
+            Gerando estratégia por perfil...
+          </div>
+        )}
+
+        {/* Media Upload */}
+        <div className="bg-zinc-900/20 border border-dashed border-zinc-800/50 rounded-md p-5" data-testid="media-upload-section">
+          <div className="flex items-center gap-2 mb-3">
+            <Upload className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Mídia do Produto</span>
+            <span className="text-zinc-700 text-xs">(opcional)</span>
+          </div>
+          {uploadedMedia.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {uploadedMedia.map((m) => (
+                <div key={m.id} className="bg-zinc-950/50 border border-zinc-800 rounded-sm px-2 py-1 text-xs text-zinc-400 flex items-center gap-1">
+                  {m.type === "image" ? <span>IMG</span> : <span>VID</span>}
+                  <span className="truncate max-w-[120px]">{m.original_name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="flex items-center justify-center gap-2 border border-zinc-800 rounded-sm py-3 cursor-pointer text-zinc-500 hover:text-white hover:border-zinc-600 transition-all text-xs">
+            {uploadingMedia ? (
+              <><Loader2 className="animate-spin h-3 w-3" /> Enviando...</>
+            ) : (
+              <><Upload className="h-3.5 w-3.5" strokeWidth={1.5} /> Enviar imagem ou vídeo</>
+            )}
+            <input
+              data-testid="media-file-input"
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={handleMediaUpload}
+              disabled={uploadingMedia}
+            />
+          </label>
+          <p className="text-zinc-700 text-xs mt-2">Imagens até 20MB, vídeos até 100MB</p>
+        </div>
+
         <Button
           data-testid="generate-ads-button"
           onClick={showRefinement ? handleRefineAndGenerate : runGenerate}
