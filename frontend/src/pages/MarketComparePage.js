@@ -33,6 +33,7 @@ const HOOK_LABELS = {
 export default function MarketComparePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
