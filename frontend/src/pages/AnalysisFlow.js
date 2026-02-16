@@ -454,7 +454,7 @@ export default function AnalysisFlow() {
           className="text-zinc-500 hover:text-white text-xs"
         >
           <Sparkles className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
-          Gerar exemplo
+          {t("flow.fill_example")}
         </Button>
       </div>
 
