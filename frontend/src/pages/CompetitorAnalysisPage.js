@@ -211,10 +211,10 @@ export default function CompetitorAnalysisPage() {
             {/* Interpretation */}
             {interp && (
               <div className="space-y-4">
-                <InterpBlock icon={Target} label="O que o anúncio tenta fazer" value={interp.o_que_tenta_fazer} color="text-blue-400" bg="bg-blue-400/5 border-blue-400/15" />
-                <InterpBlock icon={Zap} label="Por que pode funcionar" value={interp.por_que_pode_funcionar} color="text-emerald-400" bg="bg-emerald-400/5 border-emerald-400/15" />
-                <InterpBlock icon={AlertTriangle} label="Onde perde força" value={interp.onde_perde_forca} color="text-amber-400" bg="bg-amber-400/5 border-amber-400/15" />
-                <InterpBlock icon={Target} label="Como superar" value={interp.como_superar} color="text-white" bg="bg-white/5 border-white/10" />
+                <InterpBlock icon={Target} label={t("comp.what_it_does")} value={interp.o_que_tenta_fazer} color="text-blue-400" bg="bg-blue-400/5 border-blue-400/15" />
+                <InterpBlock icon={Zap} label={t("comp.why_works")} value={interp.por_que_pode_funcionar} color="text-emerald-400" bg="bg-emerald-400/5 border-emerald-400/15" />
+                <InterpBlock icon={AlertTriangle} label={t("comp.where_weak")} value={interp.onde_perde_forca} color="text-amber-400" bg="bg-amber-400/5 border-amber-400/15" />
+                <InterpBlock icon={Target} label={t("comp.how_beat")} value={interp.como_superar} color="text-white" bg="bg-white/5 border-white/10" />
               </div>
             )}
 
