@@ -1527,6 +1527,18 @@ async def get_creative_file(creative_id: str):
         return FileResponse(filepath_mp4, media_type="video/mp4")
     raise HTTPException(status_code=404, detail="Criativo não encontrado")
 
+@api_router.get("/creatives/hooks")
+async def get_hook_templates():
+    return {
+        "templates": [
+            {"id": "vsl", "label": "VSL (Video Sales Letter)", "desc": "Gancho forte + problema + solução + urgência", "icon": "zap"},
+            {"id": "ugc", "label": "UGC (User Generated)", "desc": "Depoimento espontâneo, câmera frontal, tom natural", "icon": "user"},
+            {"id": "before_after", "label": "Before/After", "desc": "Contraste dramático: antes do problema vs. depois", "icon": "arrow-right"},
+            {"id": "depoimento", "label": "Depoimento Emocional", "desc": "História real de transformação, tom vulnerável", "icon": "heart"},
+            {"id": "problema_solucao", "label": "Problema-Solução", "desc": "Dor intensa → pausa → revelação → produto em ação", "icon": "target"},
+        ]
+    }
+
 @api_router.get("/creatives/list/{analysis_id}")
 async def list_creatives(analysis_id: str, user=Depends(get_current_user)):
     items = await db.creatives.find(
