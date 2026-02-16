@@ -186,18 +186,18 @@ export default function CompetitorAnalysisPage() {
             <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6">
               <div className="flex items-center gap-2 mb-5">
                 <Eye className="h-4 w-4 text-white" strokeWidth={1.5} />
-                <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Extração Estratégica</span>
+                <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">{t("comp.extraction")}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <ExtractBlock label="Tipo de Abertura" value={a.tipo_abertura} />
-                <ExtractBlock label="Promessa" value={a.promessa} />
-                <ExtractBlock label="Mecanismo" value={a.mecanismo} />
-                <ExtractBlock label="Prova" value={a.prova} />
-                <ExtractBlock label="CTA" value={a.cta} />
-                <ExtractBlock label="Psicologia" value={a.psicologia_utilizada} />
-                <ExtractBlock label="Formato Visual" value={a.formato_visual} />
+                <ExtractBlock label={t("comp.opening_type")} value={a.tipo_abertura} />
+                <ExtractBlock label={t("comp.promise")} value={a.promessa} />
+                <ExtractBlock label={t("comp.mechanism")} value={a.mecanismo} />
+                <ExtractBlock label={t("comp.proof")} value={a.prova} />
+                <ExtractBlock label={t("comp.cta")} value={a.cta} />
+                <ExtractBlock label={t("comp.psychology")} value={a.psicologia_utilizada} />
+                <ExtractBlock label={t("comp.visual_format")} value={a.formato_visual} />
                 <div className="space-y-1">
-                  <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Risco de Bloqueio</span>
+                  <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">{t("comp.block_risk")}</span>
                   <div className="flex items-center gap-2">
                     <Shield className={`h-3.5 w-3.5 ${riskColor(a.risco_bloqueio)}`} strokeWidth={1.5} />
                     <Badge variant="outline" className={`${riskColor(a.risco_bloqueio)} ${riskBg(a.risco_bloqueio)} text-xs`}>
