@@ -179,7 +179,7 @@ export default function MarketComparePage() {
               <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart3 className="h-4 w-4 text-white" strokeWidth={1.5} />
-                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Distribuição de Hooks no Mercado</span>
+                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">{t("mkt.hooks")}</span>
                 </div>
                 <div className="space-y-3">
                   {Object.entries(hooks).sort(([, a], [, b]) => b - a).map(([type, pct]) => (
