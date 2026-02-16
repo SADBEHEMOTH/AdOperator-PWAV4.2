@@ -105,6 +105,25 @@ export default function CompetitorAnalysisPage() {
     navigate("/analysis/new");
   };
 
+  const handlePhashAnalysis = async () => {
+    const urls = imageUrls.split("\n").map(u => u.trim()).filter(u => u.length > 0);
+    if (urls.length === 0) return;
+    setPhashLoading(true);
+    setPhashResult(null);
+    try {
+      const { data } = await api.post("/competitor/image-analysis", {
+        image_urls: urls,
+        compare_with_analysis_id: compareAnalysisId || "",
+      });
+      setPhashResult(data);
+      toast.success(`${data.summary.hashed_successfully}/${data.summary.total_images} imagens analisadas`);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erro na análise visual");
+    } finally {
+      setPhashLoading(false);
+    }
+  };
+
   const a = result?.analise;
   const interp = result?.interpretacao;
   const dados = result?.dados_coletados;
