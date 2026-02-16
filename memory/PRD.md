@@ -8,20 +8,9 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 - **Backend**: FastAPI + Python (port 8001)
 - **Database**: MongoDB
 - **AI**: Claude Sonnet 4.5 via Emergent LLM Key
+- **Image Gen**: Nano Banana (Gemini), GPT Image 1 (OpenAI)
 - **Auth**: JWT-based
-- **PWA**: manifest.json + service-worker.js (stale-while-revalidate)
-
-## Core Requirements
-1. Product Input Form (nome, nicho, publico_alvo, promessa, beneficios, mecanismo, tom)
-2. Strategic Parser (consciousness level, pain, objections, angle, big idea, mechanism)
-3. Ad Variations Generator (3 hooks, 3 copies, 3 UGC scripts)
-4. Audience Simulator (4 profiles: Skeptical, Interested, Impulsive, Suspicious)
-5. Decision Engine (weighted scoring, winner selection, explanation)
-6. Market Comparison (niche patterns, hook distribution, competitive advantage)
-7. Competitor Analysis (URL scraping + AI extraction)
-8. Multi-language support (PT/EN/ES)
-9. Radar de Tendências (AI-generated weekly niche briefing)
-10. PWA (installable, offline-ready)
+- **PWA**: manifest.json + service-worker.js + push notifications
 
 ## What's Been Implemented
 
@@ -38,39 +27,47 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 - Enhanced Dashboard with "Produto Ativo" live panel + 3 action buttons
 - Market Comparison page (/analysis/:id/market)
 - Competitor Analysis page (/competitor) with URL scraping
-- Backend hook classification, block risk detection, web scraping utilities
+- Backend hook classification, block risk detection, web scraping
 
 ### PASSO 2 - i18n + PWA + Radar (Feb 16, 2026)
-- **Multi-language (PT/EN/ES)**: LanguageContext with comprehensive translations, LanguageSelector component on all pages, x-language header sent to backend, AI responds in selected language
-- **PWA**: manifest.json, service-worker.js (stale-while-revalidate for assets, network-first for API), offline fallback page, app icons (192px + 512px)
-- **Radar de Tendências**: POST /api/radar/generate (AI briefing from accumulated analyses), GET /api/radar/latest, Dashboard card with health score, market changes, emerging patterns, recommendations
+- Multi-language (PT/EN/ES) with LanguageContext
+- PWA: manifest.json, service-worker.js, offline fallback, icons
+- Radar de Tendências: AI briefing from accumulated analyses
+
+### PASSO 3 - Strategy Table + Media + Creatives + Push (Feb 16, 2026)
+- **Strategy Operational Table**: Comparative table per audience profile (Cético, Interessado, Impulsivo, Desconfiado) with abordagem, motivação, roteiro, pontos fortes/fracos
+- **Media Upload**: Image (20MB) and video (100MB) upload with file serving
+- **Creative Generation**: 3 providers - Nano Banana (Gemini), GPT Image 1 (OpenAI), Claude Text (visual briefing)
+- **Actionable Flow Endings**: Decision step ends with 5 actions: Use ad, Improve, Generate Creative, Compare Market, Analyze Competitor
+- **Push Notifications**: Service worker with push events, subscription endpoint, notification prompt on dashboard
 
 ## Key Routes
-- `/` - Dashboard (live panel + radar + history)
-- `/login` - Auth (with language selector)
-- `/analysis/new` - Analysis flow
+- `/` - Dashboard (live panel + radar + history + push prompt)
+- `/login` - Auth
+- `/analysis/new` - Analysis flow (with strategy table + media upload)
 - `/analysis/:id` - Result page
 - `/analysis/:id/market` - Market comparison
+- `/analysis/:id/creative` - Creative generation (3 providers)
 - `/competitor` - Competitor URL analysis
 - `/public/:token` - Public shared result
 
 ## Key API Endpoints
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
 - `POST /api/analyses` → `parse` → `generate` → `simulate` → `decide` → `improve`
+- `POST /api/analyses/:id/strategy-table`
 - `POST /api/analyses/:id/market-compare`
+- `POST /api/media/upload`, `GET /api/media/:id`, `GET /api/media/user/list`
+- `POST /api/creatives/generate`, `GET /api/creatives/file/:id`, `GET /api/creatives/list/:id`
 - `POST /api/competitor/analyze`, `GET /api/competitor/analyses`
 - `POST /api/radar/generate`, `GET /api/radar/latest`
+- `POST /api/push/subscribe`
 
 ## Prioritized Backlog
-
-### P0 (Remaining PASSO 1 tasks)
-- **Etapa Estratégia Operacional**: Tabela comparativa por perfil de público
-- **Solicitar Mídia**: Upload de imagem/vídeo do produto
-- **Geração de Criativos**: Gerar fotos e hooks de vídeo (Nano Banana + GPT Image 1 + 1 more)
-- **Fluxo Final Acionável**: Todo fluxo termina com ação
 
 ### P2 (Future)
 - AI-enhanced compliance rewrite suggestions
 - A/B testing tracking integration
 - Template library for common niches
 - Team collaboration features
+- Real push notification delivery (needs VAPID keys)
+- Video generation with hooks
