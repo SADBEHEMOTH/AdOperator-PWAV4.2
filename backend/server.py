@@ -120,13 +120,22 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token inválido")
 
+LANGUAGE_INSTRUCTIONS = {
+    "en": "\n\nIMPORTANT: Respond entirely in ENGLISH. All text values in the JSON must be in English.",
+    "es": "\n\nIMPORTANTE: Responde completamente en ESPAÑOL. Todos los valores de texto en el JSON deben ser en español.",
+    "pt": "",
+}
+
 # --- AI Helper ---
 
-async def call_claude(system_message: str, user_text: str, session_id: str):
+async def call_claude(system_message: str, user_text: str, session_id: str, lang: str = "pt"):
+    lang_instruction = LANGUAGE_INSTRUCTIONS.get(lang, "")
+    full_system = system_message + lang_instruction
+
     chat = LlmChat(
         api_key=EMERGENT_KEY,
         session_id=session_id,
-        system_message=system_message
+        system_message=full_system
     ).with_model("anthropic", "claude-sonnet-4-5-20250929")
 
     response = await chat.send_message(UserMessage(text=user_text))
