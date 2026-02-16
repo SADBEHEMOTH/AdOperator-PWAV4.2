@@ -41,6 +41,7 @@ import {
   BarChart3,
   Search as SearchIcon,
   Upload,
+  Users,
 } from "lucide-react";
 
 const getStepTitles = (t) => [t("flow.step1"), t("flow.step2"), t("flow.step3"), t("flow.step4"), t("flow.step5")];
