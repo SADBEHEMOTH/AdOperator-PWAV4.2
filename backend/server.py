@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -7,6 +8,7 @@ import os
 import logging
 import json
 import re
+import base64
 from pathlib import Path
 from pydantic import BaseModel
 from typing import List, Optional
@@ -14,7 +16,8 @@ import uuid
 from datetime import datetime, timezone
 import bcrypt
 import jwt
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
 import httpx
 from bs4 import BeautifulSoup
 
