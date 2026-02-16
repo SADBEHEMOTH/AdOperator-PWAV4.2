@@ -572,8 +572,8 @@ export default function AnalysisFlow() {
         {showRefinement && (
           <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-md p-6 space-y-5 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Dados Adicionais</span>
-              <button onClick={() => setShowRefinement(false)} className="text-zinc-600 hover:text-white text-xs transition-colors">Fechar</button>
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">{t("flow.additional_data")}</span>
+              <button onClick={() => setShowRefinement(false)} className="text-zinc-600 hover:text-white text-xs transition-colors">{t("flow.close")}</button>
             </div>
             {renderExtraFields()}
           </div>
