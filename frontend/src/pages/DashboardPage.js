@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical, Zap, TrendingUp, ArrowRight, BarChart3, Search, Loader2, AlertTriangle, Radio } from "lucide-react";
+import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical, Zap, TrendingUp, ArrowRight, BarChart3, Search, Loader2, AlertTriangle, Radio, Brain, Target, Users as UsersIcon, Eye } from "lucide-react";
 import { toast } from "sonner";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 
