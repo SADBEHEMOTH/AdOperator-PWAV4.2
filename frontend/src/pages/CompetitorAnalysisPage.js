@@ -44,6 +44,9 @@ export default function CompetitorAnalysisPage() {
     api.get("/competitor/analyses")
       .then((res) => setHistory(res.data))
       .catch(() => {});
+    api.get("/analyses")
+      .then((res) => setAnalyses(res.data.filter(a => a.status === "completed")))
+      .catch(() => {});
   }, []);
 
   const stages = [
