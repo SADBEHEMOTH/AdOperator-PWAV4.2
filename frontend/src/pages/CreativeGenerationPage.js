@@ -29,6 +29,16 @@ import {
   Video,
   Info,
   Clock,
+  Zap,
+  User,
+  ArrowRight,
+  Heart,
+  Target,
+  History,
+  GitBranch,
+  ChevronDown,
+  ChevronUp,
+  Eye,
 } from "lucide-react";
 
 const IMAGE_PROVIDERS = [
@@ -54,12 +64,145 @@ const VIDEO_DURATIONS = [
   { value: "12", label: "12 segundos" },
 ];
 
+const HOOK_TEMPLATES = [
+  { id: "vsl", label: "VSL", desc: "Gancho forte + problema + urgência", icon: Zap, color: "text-amber-400" },
+  { id: "ugc", label: "UGC", desc: "Depoimento espontâneo, câmera frontal", icon: User, color: "text-blue-400" },
+  { id: "before_after", label: "Before/After", desc: "Antes do problema vs. depois", icon: ArrowRight, color: "text-emerald-400" },
+  { id: "depoimento", label: "Depoimento", desc: "História real de transformação", icon: Heart, color: "text-rose-400" },
+  { id: "problema_solucao", label: "Problema-Solução", desc: "Dor intensa → revelação → produto", icon: Target, color: "text-purple-400" },
+];
+
 const CREATIVE_TIPS = [
   { title: "VSL (Video Sales Letter)", tip: "Comece com um gancho forte nos primeiros 3s. Use texto sobreposto e urgência visual." },
   { title: "UGC (User Generated)", tip: "Simule depoimento real. Câmera frontal, iluminação natural, tom conversacional." },
   { title: "Produto em Ação", tip: "Mostre o produto sendo usado. Before/After funciona bem para conversão." },
   { title: "Anúncio Estático", tip: "Imagem clean com headline forte, cor contrastante no CTA, pouco texto." },
 ];
+
+const ALL_PROVIDERS = [...IMAGE_PROVIDERS, ...VIDEO_PROVIDERS];
+
+function VersionBadge({ version }) {
+  return (
+    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs font-mono">
+      v{version}
+    </Badge>
+  );
+}
+
+function CreativeCard({ creative, apiUrl, isSelected, onSelect, onIterate }) {
+  const provider = ALL_PROVIDERS.find((p) => p.id === creative.provider);
+  const hookTpl = HOOK_TEMPLATES.find((h) => h.id === creative.hook_template);
+
+  return (
+    <div
+      data-testid={`creative-card-${creative.id}`}
+      className={`bg-zinc-900/20 border rounded-md overflow-hidden transition-all duration-200 cursor-pointer ${
+        isSelected ? "border-white/30 ring-1 ring-white/10" : "border-zinc-800/30 hover:border-zinc-700"
+      }`}
+      onClick={() => onSelect(creative)}
+    >
+      {creative.image_url && (
+        <img src={`${apiUrl}${creative.image_url}`} alt="Criativo" className="w-full h-36 object-cover" />
+      )}
+      {creative.video_url && (
+        <video src={`${apiUrl}${creative.video_url}`} className="w-full h-36 object-cover" muted />
+      )}
+      {creative.briefing && !creative.image_url && !creative.video_url && (
+        <div className="p-3 h-36 flex items-center">
+          <p className="text-zinc-300 text-xs line-clamp-5">{creative.briefing.conceito_visual}</p>
+        </div>
+      )}
+      <div className="px-3 py-2 flex items-center justify-between gap-1">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Badge variant="outline" className={`${provider?.color || "text-zinc-400"} border-zinc-800 text-xs shrink-0`}>
+            {provider?.label || creative.provider}
+          </Badge>
+          <VersionBadge version={creative.version || 1} />
+          {hookTpl && (
+            <Badge variant="outline" className="text-zinc-600 border-zinc-800 text-xs shrink-0">
+              {hookTpl.label}
+            </Badge>
+          )}
+        </div>
+        <button
+          data-testid={`iterate-creative-${creative.id}`}
+          onClick={(e) => { e.stopPropagation(); onIterate(creative); }}
+          title="Criar nova versão"
+          className="text-zinc-600 hover:text-white transition-colors p-1 shrink-0"
+        >
+          <GitBranch className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CreativeDetailPanel({ creative, apiUrl, onClose }) {
+  if (!creative) return null;
+  const provider = ALL_PROVIDERS.find((p) => p.id === creative.provider);
+  const hookTpl = HOOK_TEMPLATES.find((h) => h.id === creative.hook_template);
+
+  return (
+    <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-md p-4 space-y-4 animate-fade-in-up" data-testid="creative-detail-panel">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Eye className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
+          <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Detalhes do Criativo</span>
+        </div>
+        <button onClick={onClose} className="text-zinc-600 hover:text-white transition-colors">
+          <ChevronUp className="h-4 w-4" strokeWidth={1.5} />
+        </button>
+      </div>
+
+      {creative.image_url && (
+        <img src={`${apiUrl}${creative.image_url}`} alt="Criativo" className="w-full rounded-sm" />
+      )}
+      {creative.video_url && (
+        <video src={`${apiUrl}${creative.video_url}`} controls className="w-full rounded-sm" autoPlay muted />
+      )}
+      {creative.briefing && (
+        <div className="space-y-2">
+          {creative.briefing.conceito_visual && <p className="text-zinc-300 text-sm">{creative.briefing.conceito_visual}</p>}
+          {creative.briefing.headline_visual && <p className="text-white text-sm font-medium">{creative.briefing.headline_visual}</p>}
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge variant="outline" className={`${provider?.color} border-zinc-800 text-xs`}>
+          {provider?.label}
+        </Badge>
+        <VersionBadge version={creative.version || 1} />
+        {hookTpl && <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">{hookTpl.label}</Badge>}
+        {creative.created_at && (
+          <span className="text-zinc-600 text-xs">
+            {new Date(creative.created_at).toLocaleString("pt-BR")}
+          </span>
+        )}
+      </div>
+
+      {creative.prompt_used && (
+        <div>
+          <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block mb-1">Prompt Usado</span>
+          <p className="text-zinc-400 text-xs leading-relaxed whitespace-pre-line">{creative.prompt_used}</p>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        {(creative.image_url || creative.video_url) && (
+          <a
+            href={`${apiUrl}${creative.image_url || creative.video_url}`}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors px-3 py-1.5 border border-zinc-800 rounded-sm"
+          >
+            <Download className="h-3 w-3" /> Download
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function CreativeGenerationPage() {
   const { id } = useParams();
@@ -72,10 +215,14 @@ export default function CreativeGenerationPage() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [videoSize, setVideoSize] = useState("1280x720");
   const [videoDuration, setVideoDuration] = useState("4");
+  const [selectedHook, setSelectedHook] = useState("");
   const [result, setResult] = useState(null);
   const [creatives, setCreatives] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [showTips, setShowTips] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedCreative, setSelectedCreative] = useState(null);
+  const [parentCreativeId, setParentCreativeId] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -97,6 +244,8 @@ export default function CreativeGenerationPage() {
         analysis_id: id,
         provider: selectedProvider,
         prompt: customPrompt || "",
+        hook_template: selectedHook || "",
+        parent_creative_id: parentCreativeId || "",
       };
       if (selectedProvider === "sora_video") {
         payload.video_size = videoSize;
@@ -108,6 +257,7 @@ export default function CreativeGenerationPage() {
       });
       setResult(data);
       setCreatives((prev) => [data, ...prev]);
+      setParentCreativeId("");
       toast.success(selectedProvider === "sora_video" ? "Vídeo gerado!" : "Criativo gerado!");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Erro ao gerar criativo");
@@ -116,14 +266,26 @@ export default function CreativeGenerationPage() {
     }
   };
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL;
+  const handleIterate = (creative) => {
+    setParentCreativeId(creative.id);
+    setSelectedProvider(creative.provider);
+    setMediaType(creative.video_url ? "video" : "image");
+    setCustomPrompt("");
+    setResult(null);
+    setSelectedCreative(null);
+    toast.info(`Iterando sobre v${creative.version || 1} — a nova versão será v${(creative.version || 1) + 1}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
+  const API_URL = process.env.REACT_APP_BACKEND_URL;
   const activeProviders = mediaType === "image" ? IMAGE_PROVIDERS : VIDEO_PROVIDERS;
 
   const handleMediaTypeChange = (type) => {
     setMediaType(type);
     setSelectedProvider(null);
     setResult(null);
+    setSelectedHook("");
+    setParentCreativeId("");
   };
 
   if (pageLoading) {
@@ -162,9 +324,18 @@ export default function CreativeGenerationPage() {
             {product?.nome}
           </h2>
           <p className="text-zinc-500 text-sm mt-1">
-            Escolha o tipo de mídia e crie visuais para seu anúncio.
+            Escolha o tipo de mídia, hook contextual e crie visuais para seu anúncio.
           </p>
         </div>
+
+        {/* Iterating indicator */}
+        {parentCreativeId && (
+          <div className="mb-4 flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/50 rounded-sm px-4 py-2.5 animate-fade-in-up" data-testid="iterating-indicator">
+            <GitBranch className="h-3.5 w-3.5 text-amber-400" strokeWidth={1.5} />
+            <span className="text-zinc-400 text-xs">Criando nova versão a partir de um criativo anterior</span>
+            <button onClick={() => setParentCreativeId("")} className="text-zinc-600 hover:text-white text-xs ml-auto">Cancelar</button>
+          </div>
+        )}
 
         {/* Media Type Toggle */}
         <div className="mb-6">
@@ -215,6 +386,41 @@ export default function CreativeGenerationPage() {
           ))}
         </div>
 
+        {/* Hook Template Selection (for video or images) */}
+        {selectedProvider && (
+          <div className="mb-6 animate-fade-in-up" data-testid="hook-templates-section">
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-3">Hook Contextual</span>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <button
+                data-testid="hook-none"
+                onClick={() => setSelectedHook("")}
+                className={`text-left p-2.5 rounded-sm border transition-all duration-200 ${
+                  !selectedHook ? "bg-zinc-900/50 border-white/20" : "border-zinc-800/30 hover:border-zinc-700"
+                }`}
+              >
+                <span className="text-zinc-400 text-xs block">Nenhum</span>
+                <span className="text-zinc-600 text-xs">Prompt livre</span>
+              </button>
+              {HOOK_TEMPLATES.map((h) => (
+                <button
+                  key={h.id}
+                  data-testid={`hook-${h.id}`}
+                  onClick={() => setSelectedHook(h.id)}
+                  className={`text-left p-2.5 rounded-sm border transition-all duration-200 ${
+                    selectedHook === h.id ? "bg-zinc-900/50 border-white/20" : "border-zinc-800/30 hover:border-zinc-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <h.icon className={`h-3 w-3 ${h.color}`} strokeWidth={1.5} />
+                    <span className="text-white text-xs font-medium">{h.label}</span>
+                  </div>
+                  <span className="text-zinc-600 text-xs line-clamp-2">{h.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Video Options */}
         {mediaType === "video" && selectedProvider === "sora_video" && (
           <div className="grid grid-cols-2 gap-3 mb-6 animate-fade-in-up" data-testid="video-options">
@@ -259,6 +465,11 @@ export default function CreativeGenerationPage() {
             }
             className="bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white/50 focus:ring-0 rounded-sm min-h-[80px] resize-none"
           />
+          {!customPrompt && selectedHook && (
+            <p className="text-zinc-600 text-xs mt-1.5">
+              O hook contextual "{HOOK_TEMPLATES.find(h => h.id === selectedHook)?.label}" será combinado automaticamente com os dados da sua análise.
+            </p>
+          )}
         </div>
 
         {/* Creative Tips Toggle */}
@@ -296,7 +507,7 @@ export default function CreativeGenerationPage() {
             </>
           ) : (
             <>
-              {mediaType === "video" ? "Gerar Vídeo" : "Gerar Criativo"}
+              {parentCreativeId ? `Nova Versão (${mediaType === "video" ? "Vídeo" : "Imagem"})` : (mediaType === "video" ? "Gerar Vídeo" : "Gerar Criativo")}
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
@@ -313,6 +524,17 @@ export default function CreativeGenerationPage() {
         {/* Result */}
         {result && (
           <div className="space-y-6 animate-fade-in-up">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-white" strokeWidth={1.5} />
+              <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Resultado</span>
+              {result.version && <VersionBadge version={result.version} />}
+              {result.hook_template && (
+                <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">
+                  {HOOK_TEMPLATES.find(h => h.id === result.hook_template)?.label}
+                </Badge>
+              )}
+            </div>
+
             {/* Image result */}
             {result.image_url && (
               <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md overflow-hidden">
@@ -324,7 +546,7 @@ export default function CreativeGenerationPage() {
                 />
                 <div className="p-4 flex items-center justify-between">
                   <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs">
-                    {[...IMAGE_PROVIDERS, ...VIDEO_PROVIDERS].find((p) => p.id === result.provider)?.label}
+                    {ALL_PROVIDERS.find((p) => p.id === result.provider)?.label}
                   </Badge>
                   <div className="flex items-center gap-2">
                     <a
@@ -337,6 +559,14 @@ export default function CreativeGenerationPage() {
                     >
                       <Download className="h-4 w-4" strokeWidth={1.5} />
                     </a>
+                    <button
+                      data-testid="iterate-result"
+                      onClick={() => handleIterate(result)}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                      title="Criar nova versão"
+                    >
+                      <GitBranch className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
                     <button
                       data-testid="regenerate-creative"
                       onClick={handleGenerate}
@@ -363,9 +593,7 @@ export default function CreativeGenerationPage() {
                 />
                 <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-amber-400 border-amber-400/30 text-xs">
-                      Sora 2
-                    </Badge>
+                    <Badge variant="outline" className="text-amber-400 border-amber-400/30 text-xs">Sora 2</Badge>
                     <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">
                       {result.video_size} | {result.video_duration}s
                     </Badge>
@@ -381,6 +609,14 @@ export default function CreativeGenerationPage() {
                     >
                       <Download className="h-4 w-4" strokeWidth={1.5} />
                     </a>
+                    <button
+                      data-testid="iterate-video-result"
+                      onClick={() => handleIterate(result)}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                      title="Criar nova versão"
+                    >
+                      <GitBranch className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
                     <button
                       data-testid="regenerate-video"
                       onClick={handleGenerate}
@@ -401,21 +637,18 @@ export default function CreativeGenerationPage() {
                   <FileText className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
                   <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Briefing Visual</span>
                 </div>
-
                 {briefing.conceito_visual && (
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Conceito Visual</span>
                     <p className="text-zinc-300 text-sm leading-relaxed">{briefing.conceito_visual}</p>
                   </div>
                 )}
-
                 {briefing.composicao && (
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Composição</span>
                     <p className="text-zinc-300 text-sm leading-relaxed">{briefing.composicao}</p>
                   </div>
                 )}
-
                 {briefing.paleta_cores && (
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Paleta de Cores</span>
@@ -426,7 +659,6 @@ export default function CreativeGenerationPage() {
                     </div>
                   </div>
                 )}
-
                 {briefing.elementos_visuais && (
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Elementos Visuais</span>
@@ -437,7 +669,6 @@ export default function CreativeGenerationPage() {
                     </div>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {briefing.headline_visual && (
                     <div className="space-y-1">
@@ -452,7 +683,6 @@ export default function CreativeGenerationPage() {
                     </div>
                   )}
                 </div>
-
                 {briefing.variacao_feed && (
                   <div className="space-y-1">
                     <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Variação Feed</span>
@@ -491,32 +721,45 @@ export default function CreativeGenerationPage() {
           </div>
         )}
 
-        {/* Past creatives */}
-        {!result && creatives.length > 0 && (
-          <div className="space-y-4">
-            <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block">Criativos anteriores</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {creatives.map((c, i) => (
-                <div key={i} className="bg-zinc-900/20 border border-zinc-800/30 rounded-md overflow-hidden">
-                  {c.image_url && (
-                    <img src={`${API_URL}${c.image_url}`} alt="Criativo" className="w-full h-40 object-cover" />
-                  )}
-                  {c.video_url && (
-                    <video src={`${API_URL}${c.video_url}`} className="w-full h-40 object-cover" muted />
-                  )}
-                  {c.briefing && (
-                    <div className="p-3">
-                      <p className="text-zinc-300 text-xs line-clamp-2">{c.briefing.conceito_visual}</p>
-                    </div>
-                  )}
-                  <div className="px-3 pb-3 pt-1">
-                    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs">
-                      {[...IMAGE_PROVIDERS, ...VIDEO_PROVIDERS].find((p) => p.id === c.provider)?.label || c.provider}
-                    </Badge>
-                  </div>
+        {/* Version History */}
+        {creatives.length > 0 && (
+          <div className="mt-8 space-y-4">
+            <button
+              data-testid="toggle-version-history"
+              onClick={() => setShowHistory(!showHistory)}
+              className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors w-full"
+            >
+              <History className="h-4 w-4" strokeWidth={1.5} />
+              <span className="text-xs font-mono uppercase tracking-widest">
+                Histórico de Versões ({creatives.length})
+              </span>
+              {showHistory ? <ChevronUp className="h-3.5 w-3.5 ml-auto" /> : <ChevronDown className="h-3.5 w-3.5 ml-auto" />}
+            </button>
+
+            {showHistory && (
+              <div className="space-y-4 animate-fade-in-up">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {creatives.map((c, i) => (
+                    <CreativeCard
+                      key={c.id || i}
+                      creative={c}
+                      apiUrl={API_URL}
+                      isSelected={selectedCreative?.id === c.id}
+                      onSelect={setSelectedCreative}
+                      onIterate={handleIterate}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+
+                {selectedCreative && (
+                  <CreativeDetailPanel
+                    creative={selectedCreative}
+                    apiUrl={API_URL}
+                    onClose={() => setSelectedCreative(null)}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>
