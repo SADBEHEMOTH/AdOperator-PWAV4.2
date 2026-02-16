@@ -221,7 +221,7 @@ export default function CompetitorAnalysisPage() {
             {/* Keywords */}
             {dados?.palavras_chave && dados.palavras_chave.length > 0 && (
               <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4">
-                <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block mb-2">Palavras-chave</span>
+                <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block mb-2">{t("comp.keywords")}</span>
                 <div className="flex flex-wrap gap-2">
                   {dados.palavras_chave.map((kw, i) => (
                     <Badge key={i} variant="outline" className="text-zinc-400 border-zinc-800 text-xs">{kw}</Badge>
