@@ -266,7 +266,7 @@ export default function CompetitorAnalysisPage() {
                 onClick={() => setShowHistory(!showHistory)}
                 className="text-zinc-600 hover:text-white text-xs transition-colors"
               >
-                {showHistory ? "Ocultar" : "Mostrar"}
+                {showHistory ? t("comp.hide") : t("comp.show")}
               </button>
             </div>
             {showHistory && history.map((item) => (
