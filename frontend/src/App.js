@@ -9,6 +9,7 @@ import ResultPage from "@/pages/ResultPage";
 import PublicResultPage from "@/pages/PublicResultPage";
 import CompetitorAnalysisPage from "@/pages/CompetitorAnalysisPage";
 import MarketComparePage from "@/pages/MarketComparePage";
+import CreativeGenerationPage from "@/pages/CreativeGenerationPage";
 import "@/App.css";
 
 const ProtectedRoute = ({ children }) => {
