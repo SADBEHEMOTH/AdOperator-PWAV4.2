@@ -164,7 +164,7 @@ export default function MarketComparePage() {
                 </>
               ) : (
                 <>
-                  Escanear mercado
+                  {t("mkt.scan")}
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </>
               )}
