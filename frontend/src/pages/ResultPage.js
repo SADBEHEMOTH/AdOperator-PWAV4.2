@@ -30,12 +30,16 @@ const STEP_LABELS = ["Estratégia", "Anúncios", "Simulação", "Decisão"];
 export default function ResultPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
   const [sharing, setSharing] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [expandedStep, setExpandedStep] = useState(null);
+  const [expandedStep, setExpandedStep] = useState(() => {
+    const stepParam = searchParams.get("step");
+    return stepParam !== null ? parseInt(stepParam) : null;
+  });
 
   const copyText = (text, label) => {
     navigator.clipboard.writeText(text);
