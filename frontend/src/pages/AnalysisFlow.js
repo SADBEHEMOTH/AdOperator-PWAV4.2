@@ -217,7 +217,7 @@ export default function AnalysisFlow() {
 
   const fillExample = () => {
     setProduct(EXAMPLE_PRODUCT);
-    toast.success("Exemplo preenchido!");
+    toast.success(t("flow.example_filled"));
   };
 
   const copyText = (text, label) => {
