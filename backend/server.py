@@ -1354,6 +1354,47 @@ Retorne SOMENTE o JSON."""
             "briefing": result_data,
             "prompt_used": base_prompt,
         }
+
+    elif data.provider == "sora_video":
+        try:
+            video_size = data.video_size if data.video_size in ["1280x720", "1792x1024", "1024x1792", "1024x1024"] else "1280x720"
+            video_duration = data.video_duration if data.video_duration in [4, 8, 12] else 4
+
+            video_prompt = data.prompt or f"Professional ad creative video for '{product['nome']}' in the {product['nicho']} niche. Promise: {product['promessa_principal']}. Hook: {v.get('hook', '')}. Style: modern, clean, suitable for social media ads."
+
+            def _generate_video():
+                video_gen = OpenAIVideoGeneration(api_key=EMERGENT_KEY)
+                return video_gen.text_to_video(
+                    prompt=video_prompt,
+                    model="sora-2",
+                    size=video_size,
+                    duration=video_duration,
+                    max_wait_time=600
+                )
+
+            video_bytes = await asyncio.get_event_loop().run_in_executor(None, _generate_video)
+
+            if not video_bytes:
+                raise HTTPException(status_code=500, detail="Falha na geração do vídeo")
+
+            filename = f"{creative_id}.mp4"
+            filepath = GENERATED_DIR / filename
+            with open(filepath, "wb") as f:
+                f.write(video_bytes)
+
+            result = {
+                "id": creative_id,
+                "provider": "sora_video",
+                "video_url": f"/api/creatives/file/{creative_id}",
+                "prompt_used": video_prompt,
+                "video_size": video_size,
+                "video_duration": video_duration,
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Sora 2 error: {e}")
+            raise HTTPException(status_code=500, detail=f"Erro ao gerar vídeo com Sora 2: {str(e)}")
     else:
         raise HTTPException(status_code=400, detail="Provider inválido")
 
