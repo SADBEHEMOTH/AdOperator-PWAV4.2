@@ -162,7 +162,7 @@ export default function AnalysisFlow() {
       }));
       setStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erro ao gerar anuncios");
+      toast.error(err.response?.data?.detail || t("flow.error_generate"));
     } finally {
       cleanup();
       setLoading(false);
@@ -182,7 +182,7 @@ export default function AnalysisFlow() {
       }));
       setStep(3);
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erro ao simular publico");
+      toast.error(err.response?.data?.detail || t("flow.error_simulate"));
     } finally {
       cleanup();
       setLoading(false);
@@ -203,7 +203,7 @@ export default function AnalysisFlow() {
       setStep(4);
     } catch (err) {
       toast.error(
-        err.response?.data?.detail || "Erro ao processar decisao"
+        err.response?.data?.detail || t("flow.error_decide")
       );
     } finally {
       cleanup();
