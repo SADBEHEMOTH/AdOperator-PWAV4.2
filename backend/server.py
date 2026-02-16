@@ -343,13 +343,73 @@ def detect_block_risk(text: str) -> dict:
         level = "baixo"
     return {"level": level, "terms": found}
 
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'}
+
+PROTECTED_DOMAINS = ['facebook.com', 'fb.com', 'instagram.com', 'tiktok.com', 'linkedin.com']
+
+def is_image_url(url: str) -> bool:
+    from urllib.parse import urlparse
+    path = urlparse(url).path.lower()
+    return any(path.endswith(ext) for ext in IMAGE_EXTENSIONS)
+
+def is_protected_domain(url: str) -> bool:
+    from urllib.parse import urlparse
+    hostname = urlparse(url).hostname or ""
+    return any(d in hostname for d in PROTECTED_DOMAINS)
+
 async def scrape_url(url: str) -> dict:
+    # If it's a direct image URL, return minimal data for AI analysis
+    if is_image_url(url):
+        return {
+            "url": url,
+            "title": "",
+            "meta_description": "",
+            "headings": [],
+            "paragraphs": [],
+            "buttons_ctas": [],
+            "images": [{"src": url, "alt": ""}],
+            "hook_type_detected": "direto",
+            "block_risk": {"level": "desconhecido", "terms": []},
+            "text_length": 0,
+            "full_text_preview": "",
+            "is_image_url": True,
+        }
+
+    # If it's a protected domain (Facebook, Instagram, etc.), use AI-based analysis
+    if is_protected_domain(url):
+        from urllib.parse import urlparse, parse_qs
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip("/").split("/")
+        query = parse_qs(parsed.query)
+        context_hints = []
+        if "ads/library" in url or "ad_library" in url:
+            context_hints.append("Facebook Ad Library")
+        if query.get("id"):
+            context_hints.append(f"Ad ID: {query['id'][0]}")
+        if path_parts:
+            context_hints.append(f"Path: {'/'.join(path_parts[:3])}")
+
+        return {
+            "url": url,
+            "title": f"Anúncio em {parsed.hostname}",
+            "meta_description": " | ".join(context_hints) if context_hints else f"Conteúdo protegido de {parsed.hostname}",
+            "headings": [],
+            "paragraphs": [f"URL de plataforma protegida ({parsed.hostname}). Conteúdo não pode ser raspado diretamente. Análise baseada nos metadados da URL e conhecimento do mercado."],
+            "buttons_ctas": [],
+            "images": [],
+            "hook_type_detected": "direto",
+            "block_risk": {"level": "desconhecido", "terms": []},
+            "text_length": 0,
+            "full_text_preview": f"URL protegida: {url}. " + " | ".join(context_hints),
+            "is_protected": True,
+        }
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
-            resp = await client.get(url, headers=headers)
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15) as http_client:
+            resp = await http_client.get(url, headers=headers)
             resp.raise_for_status()
     except Exception as e:
         logger.error(f"Scrape failed for {url}: {e}")
