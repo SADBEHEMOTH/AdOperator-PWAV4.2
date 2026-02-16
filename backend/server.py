@@ -994,6 +994,268 @@ async def get_latest_radar(user=Depends(get_current_user)):
         return None
     return {"id": radar["id"], **radar.get("result", {}), "created_at": radar["created_at"]}
 
+# --- Strategy Operational Table ---
+
+@api_router.post("/analyses/{analysis_id}/strategy-table")
+async def generate_strategy_table(analysis_id: str, request: Request, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
+    )
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Análise não encontrada")
+    if not analysis.get("strategic_analysis"):
+        raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
+
+    product = analysis["product"]
+    strategy = analysis["strategic_analysis"]
+
+    system_msg = """Você é um estrategista de anúncios digitais. Gere uma tabela comparativa detalhada para cada perfil de público.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "perfis": [
+    {
+      "nome": "Cético",
+      "emoji": "string",
+      "abordagem": "string - como abordar esse perfil",
+      "motivacao": "string - o que motiva esse perfil a comprar",
+      "roteiro": "string - roteiro resumido de 3-4 passos para converter",
+      "pontos_fortes": ["string - 2-3 pontos fortes da abordagem"],
+      "pontos_fracos": ["string - 2-3 pontos fracos / riscos"],
+      "hook_recomendado": "string - tipo de hook ideal para esse perfil",
+      "tom_ideal": "string - tom de comunicação recomendado"
+    }
+  ],
+  "recomendacao_geral": "string - qual perfil priorizar e por quê"
+}
+Gere 4 perfis: Cético, Interessado, Impulsivo, Desconfiado.
+Retorne SOMENTE o JSON."""
+
+    user_text = f"""PRODUTO: {product['nome']}
+NICHO: {product['nicho']}
+PROMESSA: {product['promessa_principal']}
+PÚBLICO: {product.get('publico_alvo', '')}
+ESTRATÉGIA:
+- Nível de consciência: {strategy.get('nivel_consciencia', '')}
+- Dor central: {strategy.get('dor_central', '')}
+- Ângulo de venda: {strategy.get('angulo_venda', '')}
+- Big Idea: {strategy.get('big_idea', '')}
+- Mecanismo: {strategy.get('mecanismo_percebido', '')}"""
+
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"strategy-table-{analysis_id}", lang)
+
+    await db.analyses.update_one(
+        {"id": analysis_id},
+        {"$set": {"strategy_table": result}}
+    )
+    return result
+
+# --- Media Upload ---
+
+@api_router.post("/media/upload")
+async def upload_media(file: UploadFile = File(...), user=Depends(get_current_user)):
+    content_type = file.content_type or ""
+    is_image = content_type.startswith("image/")
+    is_video = content_type.startswith("video/")
+
+    if not is_image and not is_video:
+        raise HTTPException(status_code=400, detail="Apenas imagens e vídeos são aceitos")
+
+    max_size = MAX_IMAGE_SIZE if is_image else MAX_VIDEO_SIZE
+    contents = await file.read()
+
+    if len(contents) > max_size:
+        limit_mb = max_size // (1024 * 1024)
+        raise HTTPException(status_code=400, detail=f"Arquivo excede o limite de {limit_mb}MB")
+
+    ext = Path(file.filename or "file").suffix or (".jpg" if is_image else ".mp4")
+    file_id = str(uuid.uuid4())
+    filename = f"{file_id}{ext}"
+    filepath = UPLOAD_DIR / filename
+
+    with open(filepath, "wb") as f:
+        f.write(contents)
+
+    media_doc = {
+        "id": file_id,
+        "user_id": user["id"],
+        "filename": filename,
+        "original_name": file.filename,
+        "content_type": content_type,
+        "size": len(contents),
+        "type": "image" if is_image else "video",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.media.insert_one(media_doc)
+
+    return {"id": file_id, "filename": filename, "type": media_doc["type"], "size": len(contents)}
+
+@api_router.get("/media/{file_id}")
+async def get_media(file_id: str):
+    media = await db.media.find_one({"id": file_id}, {"_id": 0})
+    if not media:
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+    filepath = UPLOAD_DIR / media["filename"]
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado no disco")
+    return FileResponse(filepath, media_type=media["content_type"])
+
+@api_router.get("/media/user/list")
+async def list_user_media(user=Depends(get_current_user)):
+    items = await db.media.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    return items
+
+# --- Creative Generation ---
+
+@api_router.post("/creatives/generate")
+async def generate_creative(data: CreativeGenerationInput, request: Request, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": data.analysis_id, "user_id": user["id"]}, {"_id": 0}
+    )
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Análise não encontrada")
+
+    product = analysis["product"]
+    strategy = analysis.get("strategic_analysis", {})
+    decision = analysis.get("decision", {})
+    v = decision.get("veredito") or decision.get("vencedor") or {}
+
+    base_prompt = data.prompt or f"Anúncio profissional para '{product['nome']}' no nicho de {product['nicho']}. Promessa: {product['promessa_principal']}. Hook: {v.get('hook', '')}. Estilo: anúncio de tráfego pago, moderno, clean."
+
+    lang = request.headers.get("x-language", "pt")
+    creative_id = str(uuid.uuid4())
+
+    if data.provider == "nano_banana":
+        try:
+            chat = LlmChat(
+                api_key=EMERGENT_KEY,
+                session_id=f"creative-nb-{creative_id}",
+                system_message="You are a professional ad creative designer."
+            )
+            chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
+
+            msg = UserMessage(text=f"Create a professional ad creative image: {base_prompt}. Style: modern, clean, high-contrast, suitable for social media ads. Do NOT include any text in the image.")
+            text_resp, images = await chat.send_message_multimodal_response(msg)
+
+            if not images:
+                raise HTTPException(status_code=500, detail="Nenhuma imagem gerada")
+
+            image_bytes = base64.b64decode(images[0]["data"])
+            filename = f"{creative_id}.png"
+            filepath = GENERATED_DIR / filename
+            with open(filepath, "wb") as f:
+                f.write(image_bytes)
+
+            result = {
+                "id": creative_id,
+                "provider": "nano_banana",
+                "image_url": f"/api/creatives/file/{creative_id}",
+                "text_response": text_resp,
+                "prompt_used": base_prompt,
+            }
+        except Exception as e:
+            logger.error(f"Nano Banana error: {e}")
+            raise HTTPException(status_code=500, detail=f"Erro ao gerar com Nano Banana: {str(e)}")
+
+    elif data.provider == "gpt_image":
+        try:
+            image_gen = OpenAIImageGeneration(api_key=EMERGENT_KEY)
+            imgs = await image_gen.generate_images(
+                prompt=f"Professional ad creative: {base_prompt}. Modern, clean, high-contrast design for social media advertising. No text overlay.",
+                model="gpt-image-1",
+                number_of_images=1
+            )
+            if not imgs:
+                raise HTTPException(status_code=500, detail="Nenhuma imagem gerada")
+
+            filename = f"{creative_id}.png"
+            filepath = GENERATED_DIR / filename
+            with open(filepath, "wb") as f:
+                f.write(imgs[0])
+
+            result = {
+                "id": creative_id,
+                "provider": "gpt_image",
+                "image_url": f"/api/creatives/file/{creative_id}",
+                "prompt_used": base_prompt,
+            }
+        except Exception as e:
+            logger.error(f"GPT Image error: {e}")
+            raise HTTPException(status_code=500, detail=f"Erro ao gerar com GPT Image: {str(e)}")
+
+    elif data.provider == "claude_text":
+        system_msg = """Você é um diretor criativo de anúncios. Gere um briefing visual detalhado para criação de anúncio.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "conceito_visual": "string - descrição do conceito visual do anúncio",
+  "composicao": "string - como os elementos devem ser posicionados",
+  "paleta_cores": ["string - 3-5 cores sugeridas com hex"],
+  "tipografia": "string - estilo de fonte recomendado",
+  "elementos_visuais": ["string - 3-5 elementos visuais obrigatórios"],
+  "variacao_stories": "string - adaptação para formato stories",
+  "variacao_feed": "string - adaptação para formato feed quadrado",
+  "headline_visual": "string - texto para sobrepor na imagem",
+  "cta_visual": "string - texto do botão CTA",
+  "referencias_estilo": "string - referências de estilo visual"
+}
+Retorne SOMENTE o JSON."""
+
+        result_data = await call_claude(system_msg, base_prompt, f"creative-claude-{creative_id}", lang)
+        result = {
+            "id": creative_id,
+            "provider": "claude_text",
+            "briefing": result_data,
+            "prompt_used": base_prompt,
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Provider inválido")
+
+    doc = {
+        "id": creative_id,
+        "user_id": user["id"],
+        "analysis_id": data.analysis_id,
+        "provider": data.provider,
+        "result": result,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.creatives.insert_one(doc)
+
+    return result
+
+@api_router.get("/creatives/file/{creative_id}")
+async def get_creative_file(creative_id: str):
+    filepath = GENERATED_DIR / f"{creative_id}.png"
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Criativo não encontrado")
+    return FileResponse(filepath, media_type="image/png")
+
+@api_router.get("/creatives/list/{analysis_id}")
+async def list_creatives(analysis_id: str, user=Depends(get_current_user)):
+    items = await db.creatives.find(
+        {"analysis_id": analysis_id, "user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    return [item.get("result", item) for item in items]
+
+# --- Push Subscription ---
+
+@api_router.post("/push/subscribe")
+async def subscribe_push(data: PushSubscriptionInput, user=Depends(get_current_user)):
+    await db.push_subscriptions.update_one(
+        {"user_id": user["id"]},
+        {"$set": {
+            "user_id": user["id"],
+            "endpoint": data.endpoint,
+            "keys": data.keys,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }},
+        upsert=True
+    )
+    return {"status": "subscribed"}
+
 # --- App Setup ---
 
 app.include_router(api_router)
