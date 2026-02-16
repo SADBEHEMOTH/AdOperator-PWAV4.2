@@ -21,6 +21,8 @@ import {
   ChevronRight,
   Clock,
   ExternalLink,
+  Fingerprint,
+  ImageIcon,
 } from "lucide-react";
 
 export default function CompetitorAnalysisPage() {
@@ -30,6 +32,11 @@ export default function CompetitorAnalysisPage() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [imageUrls, setImageUrls] = useState("");
+  const [phashLoading, setPhashLoading] = useState(false);
+  const [phashResult, setPhashResult] = useState(null);
+  const [analyses, setAnalyses] = useState([]);
+  const [compareAnalysisId, setCompareAnalysisId] = useState("");
   const navigate = useNavigate();
   const { t } = useLanguage();
 
