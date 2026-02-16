@@ -870,7 +870,85 @@ Analise o mercado deste nicho e compare com a estratégia do usuário. Gere 5-7 
 async def analyze_competitor(data: CompetitorURLInput, request: Request, user=Depends(get_current_user)):
     scraped = await scrape_url(data.url)
 
-    system_msg = """Você é um analista estratégico de anúncios digitais.
+    is_img = scraped.get("is_image_url", False)
+    is_protected = scraped.get("is_protected", False)
+
+    if is_img:
+        system_msg = """Você é um analista estratégico de anúncios digitais.
+O usuário forneceu uma URL direta para uma imagem de anúncio de um concorrente. Com base no URL e no contexto do mercado, gere uma análise estratégica baseada no que esse tipo de criativo visual provavelmente comunica.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "analise": {
+    "tipo_abertura": "string - tipo provável de abertura visual",
+    "promessa": "string - promessa provável baseada no formato visual",
+    "mecanismo": "string - mecanismo provável",
+    "prova": "string - tipo de prova provável",
+    "cta": "string - CTA provável",
+    "psicologia_utilizada": "string - técnicas visuais prováveis",
+    "risco_bloqueio": "baixo | medio | alto",
+    "formato_visual": "imagem estática"
+  },
+  "interpretacao": {
+    "o_que_tenta_fazer": "string",
+    "por_que_pode_funcionar": "string",
+    "onde_perde_forca": "string",
+    "como_superar": "string"
+  },
+  "dados_coletados": {
+    "titulo_pagina": "Imagem de anúncio",
+    "hook_principal": "string - gancho visual provável",
+    "tipo_hook": "direto",
+    "ctas_encontrados": [],
+    "elementos_persuasao": ["string"],
+    "palavras_chave": ["string"]
+  }
+}
+Retorne SOMENTE o JSON."""
+        content_text = f"URL da imagem de anúncio do concorrente: {data.url}\nAnalise o que esse tipo de criativo visual provavelmente comunica no mercado de anúncios digitais."
+
+    elif is_protected:
+        system_msg = """Você é um analista estratégico de anúncios digitais.
+O usuário forneceu uma URL de uma plataforma protegida (como Facebook Ads Library, Instagram, etc.) que não pode ser raspada diretamente.
+Com base na URL, nos metadados disponíveis e no seu conhecimento sobre padrões de anúncios nessas plataformas, gere a melhor análise estratégica possível.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "analise": {
+    "tipo_abertura": "string",
+    "promessa": "string",
+    "mecanismo": "string",
+    "prova": "string",
+    "cta": "string",
+    "psicologia_utilizada": "string",
+    "risco_bloqueio": "baixo | medio | alto",
+    "formato_visual": "string"
+  },
+  "interpretacao": {
+    "o_que_tenta_fazer": "string",
+    "por_que_pode_funcionar": "string",
+    "onde_perde_forca": "string",
+    "como_superar": "string"
+  },
+  "dados_coletados": {
+    "titulo_pagina": "string",
+    "hook_principal": "string",
+    "tipo_hook": "pergunta | historia | lista | prova_social | mecanismo | choque",
+    "ctas_encontrados": ["strings"],
+    "elementos_persuasao": ["strings"],
+    "palavras_chave": ["strings"]
+  }
+}
+Retorne SOMENTE o JSON."""
+        content_text = f"""URL protegida: {scraped['url']}
+Plataforma: {scraped['title']}
+Contexto: {scraped['meta_description']}
+Informações disponíveis: {scraped['full_text_preview']}
+
+Faça a melhor análise possível com base nos metadados da URL e seu conhecimento sobre anúncios nessa plataforma."""
+
+    else:
+        system_msg = """Você é um analista estratégico de anúncios digitais.
 Analise o conteúdo desta página/anúncio de um concorrente e extraia uma análise estratégica completa.
 
 Retorne APENAS JSON válido (sem markdown):
@@ -902,7 +980,7 @@ Retorne APENAS JSON válido (sem markdown):
 }
 Retorne SOMENTE o JSON."""
 
-    content_text = f"""URL: {scraped['url']}
+        content_text = f"""URL: {scraped['url']}
 Título: {scraped['title']}
 Meta Description: {scraped['meta_description']}
 
@@ -921,11 +999,13 @@ RISCO DE BLOQUEIO (automático): {scraped['block_risk']['level']} - termos: {', 
     lang = request.headers.get("x-language", "pt")
     result = await call_claude(system_msg, content_text, f"competitor-{uuid.uuid4()}", lang)
 
+    source_type = "image" if is_img else ("protected" if is_protected else "webpage")
     result["scraping_data"] = {
         "url": scraped["url"],
         "hook_type_auto": scraped["hook_type_detected"],
         "block_risk_auto": scraped["block_risk"],
         "images_found": len(scraped["images"]),
+        "source_type": source_type,
     }
 
     comp_id = str(uuid.uuid4())
