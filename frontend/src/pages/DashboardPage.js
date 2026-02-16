@@ -132,6 +132,9 @@ export default function DashboardPage() {
 
         <Separator className="bg-zinc-800/50 mb-8" />
 
+        {/* Push Notification Prompt */}
+        <PushNotificationPrompt />
+
         {/* Quick Actions - when analyses exist but none completed */}
         {!loading && analyses.length > 0 && !analyses.find(a => a.status === "completed") && (
           <div className="mb-6 flex gap-3 animate-fade-in-up">
