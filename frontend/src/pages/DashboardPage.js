@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical, Zap, TrendingUp, ArrowRight, BarChart3, Search, Loader2, AlertTriangle, Radio } from "lucide-react";
 import { toast } from "sonner";
+import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 
 export default function DashboardPage() {
   const [analyses, setAnalyses] = useState([]);
