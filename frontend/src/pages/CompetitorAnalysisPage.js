@@ -329,6 +329,120 @@ export default function CompetitorAnalysisPage() {
             ))}
           </div>
         )}
+
+        {/* pHash Visual Analysis */}
+        <Separator className="bg-zinc-800/30 my-8" />
+        <div className="space-y-5" data-testid="phash-section">
+          <div className="flex items-center gap-2 mb-2">
+            <Fingerprint className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Análise Visual (pHash)</span>
+          </div>
+          <p className="text-zinc-600 text-xs">Cole URLs de imagens de concorrentes para calcular a assinatura visual e comparar com seus criativos.</p>
+          <textarea
+            data-testid="phash-image-urls"
+            value={imageUrls}
+            onChange={(e) => setImageUrls(e.target.value)}
+            placeholder={"Cole URLs de imagem (uma por linha):\nhttps://exemplo.com/ad1.jpg\nhttps://exemplo.com/ad2.png"}
+            className="w-full bg-zinc-950/50 border border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white/50 focus:ring-0 rounded-sm min-h-[80px] resize-none p-3 text-sm"
+          />
+          {analyses.length > 0 && (
+            <div className="space-y-1.5">
+              <span className="text-zinc-600 text-xs">Comparar com criativos de:</span>
+              <select
+                data-testid="phash-compare-analysis"
+                value={compareAnalysisId}
+                onChange={(e) => setCompareAnalysisId(e.target.value)}
+                className="w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-sm h-10 px-3 text-xs"
+              >
+                <option value="">Nenhuma análise (só calcular hashes)</option>
+                {analyses.map((a) => (
+                  <option key={a.id} value={a.id}>{a.product?.nome} — {a.product?.nicho}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Button
+            data-testid="run-phash-analysis"
+            onClick={handlePhashAnalysis}
+            disabled={phashLoading || !imageUrls.trim()}
+            variant="outline"
+            className="w-full border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white rounded-sm h-11"
+          >
+            {phashLoading ? (
+              <><Loader2 className="animate-spin mr-2 h-4 w-4" />Analisando imagens...</>
+            ) : (
+              <><Fingerprint className="mr-2 h-4 w-4" strokeWidth={1.5} />Analisar Imagens</>
+            )}
+          </Button>
+
+          {phashResult && (
+            <div className="space-y-4 animate-fade-in-up">
+              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-4 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Resumo</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div><span className="text-zinc-600 block">Imagens</span><span className="text-white font-mono">{phashResult.summary.total_images}</span></div>
+                  <div><span className="text-zinc-600 block">Hashes OK</span><span className="text-emerald-400 font-mono">{phashResult.summary.hashed_successfully}</span></div>
+                  <div><span className="text-zinc-600 block">Similar aos seus</span><span className="text-amber-400 font-mono">{phashResult.summary.similar_to_creatives}</span></div>
+                  <div><span className="text-zinc-600 block">Similares entre si</span><span className="text-blue-400 font-mono">{phashResult.summary.similar_cross}</span></div>
+                </div>
+              </div>
+
+              {phashResult.images.map((img, i) => (
+                <div key={i} className="bg-zinc-900/20 border border-zinc-800/30 rounded-sm p-3 flex items-center gap-3">
+                  <ImageIcon className="h-4 w-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-zinc-300 text-xs truncate">{img.url}</p>
+                    <span className="text-zinc-600 text-xs font-mono">{img.phash || "Falhou"}</span>
+                  </div>
+                  <Badge variant="outline" className={`shrink-0 text-xs ${img.status === "ok" ? "text-emerald-400 border-emerald-400/30" : "text-red-400 border-red-400/30"}`}>
+                    {img.status === "ok" ? "OK" : "Falha"}
+                  </Badge>
+                </div>
+              ))}
+
+              {phashResult.creative_comparisons.length > 0 && (
+                <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-4 space-y-3">
+                  <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Comparação com seus criativos</span>
+                  {phashResult.creative_comparisons.map((c, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-2 border-b border-zinc-800/20 last:border-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-zinc-400 truncate">{c.competitor_url}</p>
+                        <span className="text-zinc-600">vs. Criativo v{c.creative_version} ({c.creative_provider})</span>
+                      </div>
+                      <div className="flex items-center gap-2 ml-3 shrink-0">
+                        <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${c.similarity_percent > 70 ? "bg-red-400" : c.similarity_percent > 40 ? "bg-amber-400" : "bg-emerald-400"}`} style={{ width: `${c.similarity_percent}%` }} />
+                        </div>
+                        <span className={`font-mono w-12 text-right ${c.is_similar ? "text-red-400" : "text-zinc-400"}`}>{c.similarity_percent}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {phashResult.cross_comparisons.length > 0 && (
+                <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-4 space-y-3">
+                  <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Similaridade entre concorrentes</span>
+                  {phashResult.cross_comparisons.map((c, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-2 border-b border-zinc-800/20 last:border-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-zinc-400 truncate">Imagem {phashResult.images.findIndex(im => im.url === c.image_a) + 1} vs. Imagem {phashResult.images.findIndex(im => im.url === c.image_b) + 1}</p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-3 shrink-0">
+                        <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${c.similarity_percent > 70 ? "bg-red-400" : c.similarity_percent > 40 ? "bg-amber-400" : "bg-emerald-400"}`} style={{ width: `${c.similarity_percent}%` }} />
+                        </div>
+                        <span className={`font-mono w-12 text-right ${c.is_similar ? "text-red-400" : "text-zinc-400"}`}>{c.similarity_percent}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
