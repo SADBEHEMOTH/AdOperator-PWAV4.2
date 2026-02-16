@@ -561,8 +561,8 @@ export default function AnalysisFlow() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-zinc-400 text-sm font-medium">Refinar dados do produto</p>
-                <p className="text-zinc-600 text-xs mt-0.5">Adicione beneficios, mecanismo e tom para resultados mais precisos</p>
+                <p className="text-zinc-400 text-sm font-medium">{t("flow.refine")}</p>
+                <p className="text-zinc-600 text-xs mt-0.5">{t("flow.refine_desc")}</p>
               </div>
               <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" strokeWidth={1.5} />
             </div>
