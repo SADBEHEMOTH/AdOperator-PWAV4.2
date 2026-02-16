@@ -838,7 +838,7 @@ export default function AnalysisFlow() {
             </>
           ) : (
             <>
-              Rodar motor de decisao
+              Rodar motor de decisão
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
