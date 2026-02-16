@@ -344,52 +344,81 @@ export default function DashboardPage() {
               <div
                 key={a.id}
                 data-testid={`analysis-item-${a.id}`}
-                onClick={() => a.status === "completed" ? navigate(`/analysis/${a.id}`) : navigate(`/analysis/new?resume=${a.id}`)}
-                className="w-full text-left bg-zinc-900/30 border border-zinc-800/50 rounded-md p-5 hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
+                className="w-full text-left bg-zinc-900/30 border border-zinc-800/50 rounded-md hover:border-zinc-700 transition-all duration-300 group"
               >
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-white font-medium text-sm truncate">{a.product?.nome}</h3>
-                    <div className="flex items-center gap-3 mt-2">
-                      <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs font-mono">{a.product?.nicho}</Badge>
-                      <span className="text-zinc-600 text-xs flex items-center gap-1">
-                        <Clock className="h-3 w-3" strokeWidth={1.5} />
-                        {new Date(a.created_at).toLocaleDateString("pt-BR")}
-                      </span>
+                <div
+                  onClick={() => a.status === "completed" ? navigate(`/analysis/${a.id}`) : navigate(`/analysis/new?resume=${a.id}`)}
+                  className="p-5 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-white font-medium text-sm truncate">{a.product?.nome}</h3>
+                      <div className="flex items-center gap-3 mt-2">
+                        <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs font-mono">{a.product?.nicho}</Badge>
+                        <span className="text-zinc-600 text-xs flex items-center gap-1">
+                          <Clock className="h-3 w-3" strokeWidth={1.5} />
+                          {new Date(a.created_at).toLocaleDateString("pt-BR")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Badge variant="outline" className={statusColors[a.status] || "text-zinc-400"}>
+                        {statusLabels[a.status] || a.status}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button data-testid={`analysis-menu-${a.id}`} onClick={(e) => e.stopPropagation()} className="text-zinc-700 hover:text-white transition-colors p-1">
+                            <MoreVertical className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+                          <DropdownMenuItem
+                            onClick={(e) => { e.stopPropagation(); a.status === "completed" ? navigate(`/analysis/${a.id}`) : navigate(`/analysis/new?resume=${a.id}`); }}
+                            className="text-zinc-300 focus:text-white focus:bg-zinc-800 cursor-pointer"
+                          >
+                            <ChevronRight className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                            {t("dash.open")}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-zinc-800" />
+                          <DropdownMenuItem
+                            data-testid={`delete-analysis-${a.id}`}
+                            onClick={(e) => handleDelete(e, a.id)}
+                            className="text-red-400 focus:text-red-300 focus:bg-zinc-800 cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                            {t("dash.delete")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" strokeWidth={1.5} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Badge variant="outline" className={statusColors[a.status] || "text-zinc-400"}>
-                      {statusLabels[a.status] || a.status}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button data-testid={`analysis-menu-${a.id}`} onClick={(e) => e.stopPropagation()} className="text-zinc-700 hover:text-white transition-colors p-1">
-                          <MoreVertical className="h-4 w-4" strokeWidth={1.5} />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
-                        <DropdownMenuItem
-                          onClick={(e) => { e.stopPropagation(); a.status === "completed" ? navigate(`/analysis/${a.id}`) : navigate(`/analysis/new?resume=${a.id}`); }}
-                          className="text-zinc-300 focus:text-white focus:bg-zinc-800 cursor-pointer"
-                        >
-                          <ChevronRight className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                          {t("dash.open")}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-zinc-800" />
-                        <DropdownMenuItem
-                          data-testid={`delete-analysis-${a.id}`}
-                          onClick={(e) => handleDelete(e, a.id)}
-                          className="text-red-400 focus:text-red-300 focus:bg-zinc-800 cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                          {t("dash.delete")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" strokeWidth={1.5} />
-                  </div>
                 </div>
+
+                {/* Step navigation for completed analyses */}
+                {a.status === "completed" && (
+                  <div className="border-t border-zinc-800/30 px-5 py-2.5 flex items-center gap-2 overflow-x-auto">
+                    {[
+                      { icon: Brain, label: "Estratégia", step: 0 },
+                      { icon: Zap, label: "Anúncios", step: 1 },
+                      { icon: UsersIcon, label: "Simulação", step: 2 },
+                      { icon: Target, label: "Decisão", step: 3 },
+                    ].map(({ icon: Icon, label, step }) => (
+                      <button
+                        key={step}
+                        data-testid={`history-step-${a.id}-${step}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/analysis/${a.id}?step=${step}`);
+                        }}
+                        className="flex items-center gap-1 text-xs text-zinc-600 hover:text-white px-2 py-1 rounded-sm hover:bg-zinc-800/50 transition-all shrink-0"
+                      >
+                        <Icon className="h-3 w-3" strokeWidth={1.5} />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
