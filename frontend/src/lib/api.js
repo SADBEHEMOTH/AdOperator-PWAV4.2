@@ -9,6 +9,8 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  const lang = localStorage.getItem("adop_lang") || "pt";
+  config.headers["x-language"] = lang;
   return config;
 });
 
