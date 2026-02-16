@@ -24,6 +24,14 @@ from bs4 import BeautifulSoup
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+GENERATED_DIR = ROOT_DIR / "generated"
+GENERATED_DIR.mkdir(exist_ok=True)
+
+MAX_IMAGE_SIZE = 20 * 1024 * 1024  # 20MB
+MAX_VIDEO_SIZE = 100 * 1024 * 1024  # 100MB
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
