@@ -172,10 +172,20 @@ export default function CompetitorAnalysisPage() {
         {result && a && (
           <div className="space-y-6 animate-fade-in-up">
             {/* URL Info */}
-            <div className="flex items-center gap-2 text-xs text-zinc-600">
-              <Globe className="h-3 w-3" strokeWidth={1.5} />
-              <span className="truncate">{scraping?.url || url}</span>
-              {scraping?.hook_type_auto && (
+            <div className="flex items-center gap-2 text-xs text-zinc-600 flex-wrap">
+              <Globe className="h-3 w-3 shrink-0" strokeWidth={1.5} />
+              <span className="truncate max-w-[300px]">{scraping?.url || url}</span>
+              {scraping?.source_type === "protected" && (
+                <Badge variant="outline" className="text-amber-400 border-amber-400/30 text-xs shrink-0">
+                  Plataforma protegida - Análise por IA
+                </Badge>
+              )}
+              {scraping?.source_type === "image" && (
+                <Badge variant="outline" className="text-blue-400 border-blue-400/30 text-xs shrink-0">
+                  Imagem direta - Análise visual
+                </Badge>
+              )}
+              {scraping?.hook_type_auto && scraping?.source_type !== "protected" && scraping?.source_type !== "image" && (
                 <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs ml-auto shrink-0">
                   Hook: {scraping.hook_type_auto}
                 </Badge>
