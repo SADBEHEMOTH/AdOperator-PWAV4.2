@@ -1,8 +1,7 @@
-const CACHE_NAME = "adoperator-v1";
+const CACHE_NAME = "adoperator-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
-  "/static/js/bundle.js",
 ];
 
 self.addEventListener("install", (event) => {
@@ -49,9 +48,53 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => cached || offlineFallback());
+        .catch(() => {
+          if (cached) return cached;
+          if (request.mode === "navigate") return offlineFallback();
+          return new Response("", { status: 408 });
+        });
 
       return cached || networkFetch;
+    })
+  );
+});
+
+self.addEventListener("push", (event) => {
+  let data = { title: "AdOperator", body: "Novidade disponível!", url: "/" };
+
+  try {
+    if (event.data) data = event.data.json();
+  } catch (e) {
+    // fallback
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "AdOperator", {
+      body: data.body || "",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      tag: data.tag || "adoperator-notification",
+      data: { url: data.url || "/" },
+      actions: data.actions || [],
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes(url) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
     })
   );
 });
