@@ -29,6 +29,8 @@ function App() {
             <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/analysis/new" element={<ProtectedRoute><AnalysisFlow /></ProtectedRoute>} />
             <Route path="/analysis/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
+            <Route path="/analysis/:id/market" element={<ProtectedRoute><MarketComparePage /></ProtectedRoute>} />
+            <Route path="/competitor" element={<ProtectedRoute><CompetitorAnalysisPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
           <Toaster
