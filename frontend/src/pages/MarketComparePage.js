@@ -129,7 +129,7 @@ export default function MarketComparePage() {
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
-            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Comparar com Mercado</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">{t("mkt.title")}</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
             {product?.nome}
