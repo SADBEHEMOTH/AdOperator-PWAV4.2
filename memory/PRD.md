@@ -1,73 +1,69 @@
 # AdOperator - PRD (Product Requirements Document)
 
-## Problem Statement
-Web application "AdOperator" - a decision engine that transforms product descriptions into ad hypotheses and automatically chooses the best one before investing in traffic.
+## Problema Original
+Criar uma aplicação web chamada "AdOperator" que transforma a descrição de um produto em hipóteses de anúncios, simula a reação do público e escolhe automaticamente o melhor anúncio antes que o usuário invista em tráfego.
 
-## Architecture
-- **Frontend**: React + Tailwind CSS + shadcn/ui (port 3000)
-- **Backend**: FastAPI + Python (port 8001)
-- **Database**: MongoDB
-- **AI**: Claude Sonnet 4.5 via Emergent LLM Key
-- **Image Gen**: Nano Banana (Gemini), GPT Image 1 (OpenAI)
-- **Auth**: JWT-based
-- **PWA**: manifest.json + service-worker.js + push notifications
+## Arquitetura
+- **Frontend:** React + Tailwind CSS + shadcn/ui
+- **Backend:** FastAPI (Python)
+- **Database:** MongoDB
+- **IA:** Claude Sonnet 4.5 (texto), GPT Image 1 (imagem), Nano Banana (imagem), Sora 2 (vídeo)
+- **Autenticação:** JWT
+- **i18n:** i18next (PT, EN, ES)
+- **PWA:** Service Workers + Web App Manifest
 
-## What's Been Implemented
+## Funcionalidades Implementadas
 
-### Core Features (Feb 2026)
-- Full JWT authentication (register, login, token validation)
-- Two input modes: Quick (3 fields) and Complete (7 fields)
-- 6-step analysis flow with experiment-format ad cards
-- 4-layer audience simulation with conflict detection
-- Verdict-first decision engine with causal explanation
-- Live dashboard panel with active product state
-- Copy/Share/Export functionality
+### Core (Fluxo de 6 etapas)
+- [x] Entrada do produto (nome, nicho, promessa, diferencial, preço, público)
+- [x] Interpretação estratégica com IA (Claude 4.5)
+- [x] Tabela de estratégia por perfil de público
+- [x] Geração de múltiplos anúncios (hipóteses concorrentes)
+- [x] Simulação de reações de público
+- [x] Motor de decisão + anúncio vencedor
+- [x] Página de resultado minimalista e acionável
 
-### PASSO 1 - Market & Competitor Analysis (Feb 16, 2026)
-- Enhanced Dashboard with "Produto Ativo" live panel + 3 action buttons
-- Market Comparison page (/analysis/:id/market)
-- Competitor Analysis page (/competitor) with URL scraping
-- Backend hook classification, block risk detection, web scraping
+### Dashboard
+- [x] Painel vivo com análises recentes
+- [x] Radar de Tendências (briefing semanal por IA)
+- [x] Navegação por etapas no histórico (Estratégia, Anúncios, Simulação, Decisão)
+- [x] Delete de análises
 
-### PASSO 2 - i18n + PWA + Radar (Feb 16, 2026)
-- Multi-language (PT/EN/ES) with LanguageContext
-- PWA: manifest.json, service-worker.js, offline fallback, icons
-- Radar de Tendências: AI briefing from accumulated analyses
+### Análise de Mercado/Concorrência
+- [x] Comparação com mercado via IA
+- [x] Análise de URLs de concorrentes
+- [x] Suporte a URLs protegidas (Facebook, Instagram, etc.) - análise por IA
+- [x] Suporte a links diretos de imagem
 
-### PASSO 3 - Strategy Table + Media + Creatives + Push (Feb 16, 2026)
-- **Strategy Operational Table**: Comparative table per audience profile (Cético, Interessado, Impulsivo, Desconfiado) with abordagem, motivação, roteiro, pontos fortes/fracos
-- **Media Upload**: Image (20MB) and video (100MB) upload with file serving
-- **Creative Generation**: 3 providers - Nano Banana (Gemini), GPT Image 1 (OpenAI), Claude Text (visual briefing)
-- **Actionable Flow Endings**: Decision step ends with 5 actions: Use ad, Improve, Generate Creative, Compare Market, Analyze Competitor
-- **Push Notifications**: Service worker with push events, subscription endpoint, notification prompt on dashboard
+### Geração de Criativos
+- [x] Geração de imagem (Nano Banana, GPT Image 1)
+- [x] Briefing visual (Claude)
+- [x] Geração de vídeo (Sora 2) - até 12s, múltiplos formatos
+- [x] Campo de prompt personalizado
+- [x] Dicas de criativos (VSL, UGC, Produto em Ação, Estático)
+- [x] Galeria de criativos anteriores
 
-## Key Routes
-- `/` - Dashboard (live panel + radar + history + push prompt)
-- `/login` - Auth
-- `/analysis/new` - Analysis flow (with strategy table + media upload)
-- `/analysis/:id` - Result page
-- `/analysis/:id/market` - Market comparison
-- `/analysis/:id/creative` - Creative generation (3 providers)
-- `/competitor` - Competitor URL analysis
-- `/public/:token` - Public shared result
+### Exportação e Compartilhamento
+- [x] Compartilhamento via link público
+- [x] Exportação para PDF (jspdf + html2canvas)
+- [x] Navegação por etapas individuais no resultado
 
-## Key API Endpoints
-- `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
-- `POST /api/analyses` → `parse` → `generate` → `simulate` → `decide` → `improve`
-- `POST /api/analyses/:id/strategy-table`
-- `POST /api/analyses/:id/market-compare`
-- `POST /api/media/upload`, `GET /api/media/:id`, `GET /api/media/user/list`
-- `POST /api/creatives/generate`, `GET /api/creatives/file/:id`, `GET /api/creatives/list/:id`
-- `POST /api/competitor/analyze`, `GET /api/competitor/analyses`
-- `POST /api/radar/generate`, `GET /api/radar/latest`
-- `POST /api/push/subscribe`
+### Infra
+- [x] PWA instalável
+- [x] Multi-idioma (PT, EN, ES)
+- [x] Upload de mídia
+- [x] Notificações push (registro de assinatura)
 
-## Prioritized Backlog
+## Bugs Corrigidos (Fev 2026)
+- [x] Análise de concorrente falha com URLs do Facebook (P0)
+- [x] Botão "Gerar Criativo" com navegação incorreta (P0)
+- [x] Tabela de estratégia não renderiza em mobile (P0)
+- [x] Geração de exemplos de produto genérica (P1)
+- [x] Análise de imagem não funciona em links diretos (P1)
+- [x] Console warning LoginPage (LOW)
 
-### P2 (Future)
-- AI-enhanced compliance rewrite suggestions
-- A/B testing tracking integration
-- Template library for common niches
-- Team collaboration features
-- Real push notification delivery (needs VAPID keys)
-- Video generation with hooks
+## Backlog
+- [ ] Refatorar AnalysisFlow.js em componentes menores
+- [ ] Análise visual com pHash em imagens de concorrentes
+- [ ] Notificações push reais (VAPID keys)
+- [ ] Geração de vídeo com hooks contextuais
