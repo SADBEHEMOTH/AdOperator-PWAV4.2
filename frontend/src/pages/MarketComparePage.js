@@ -116,9 +116,12 @@ export default function MarketComparePage() {
             className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
-            <span className="text-sm">Voltar</span>
+            <span className="text-sm">{t("flow.back")}</span>
           </button>
-          <span className="text-sm font-semibold text-white">AdOperator</span>
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <span className="text-sm font-semibold text-white">AdOperator</span>
+          </div>
         </div>
       </header>
 
