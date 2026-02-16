@@ -46,15 +46,18 @@ import {
 const getStepTitles = (t) => [t("flow.step1"), t("flow.step2"), t("flow.step3"), t("flow.step4"), t("flow.step5")];
 const getStepDescriptions = (t) => [t("flow.step1_desc"), t("flow.step2_desc"), t("flow.step3_desc"), t("flow.step4_desc"), t("flow.step5_desc")];
 
-const EXAMPLE_PRODUCT = {
-  nome: "CapilarMax Pro",
-  nicho: "Saude Capilar",
-  promessa_principal: "Reduzir a queda de cabelo em ate 60% nos primeiros 90 dias",
-  publico_alvo: "Homens de 25-55 anos que sofrem com queda de cabelo",
-  beneficios: "Fortalece os fios, estimula o crescimento, reduz a oleosidade do couro cabeludo, resultados visiveis em 30 dias",
-  ingredientes_mecanismo: "Complexo de biotina + zinco + saw palmetto que atua bloqueando o DHT no foliculo capilar",
-  tom: "direto",
-};
+const NICHE_EXAMPLES = [
+  { nome: "CapilarMax Pro", nicho: "Saude Capilar", promessa_principal: "Reduzir a queda de cabelo em ate 60% nos primeiros 90 dias", publico_alvo: "Homens de 25-55 anos que sofrem com queda de cabelo", beneficios: "Fortalece os fios, estimula o crescimento, reduz a oleosidade do couro cabeludo, resultados visiveis em 30 dias", ingredientes_mecanismo: "Complexo de biotina + zinco + saw palmetto que atua bloqueando o DHT no foliculo capilar", tom: "cientifico" },
+  { nome: "VitaForce Homem", nicho: "Masculino", promessa_principal: "Recuperar a disposição e performance que você tinha aos 25 anos", publico_alvo: "Homens 35-60 anos com queda de energia e libido", beneficios: "Mais energia no dia a dia, melhora da performance física, aumento da disposição, recuperação muscular acelerada", ingredientes_mecanismo: "Blend de tribulus terrestris + maca peruana + boro quelado que otimiza a produção natural de testosterona", tom: "direto" },
+  { nome: "SlimBurn 360", nicho: "Emagrecimento", promessa_principal: "Acelerar o metabolismo para queimar gordura localizada sem dietas restritivas", publico_alvo: "Mulheres e homens 25-50 que querem perder peso sem academia", beneficios: "Reduz medidas abdominais, controla a fome, aumenta a termogênese, reduz inchaço", ingredientes_mecanismo: "Morosil + cromo picolinato + spirulina que ativa a lipólise e reduz absorção de gordura", tom: "urgente" },
+  { nome: "ArticuFlex Plus", nicho: "Dores", promessa_principal: "Aliviar dores articulares crônicas e devolver a mobilidade em 15 dias", publico_alvo: "Pessoas 45+ com dores nos joelhos, costas ou articulações", beneficios: "Alívio de dor progressivo, regenera cartilagem, reduz inflamação, melhora mobilidade", ingredientes_mecanismo: "UC-II (colágeno tipo 2 não desnaturado) + cúrcuma longa + MSM que regenera a cartilagem e reduz inflamação", tom: "humano" },
+  { nome: "CinturaShape Modeladora", nicho: "Feminino", promessa_principal: "Afinar a cintura e modelar a silhueta com conforto durante todo o dia", publico_alvo: "Mulheres 20-45 que querem efeito visual imediato no corpo", beneficios: "Redução visual de 2 medidas na cintura, corrige postura, comprime sem desconforto, invisível sob a roupa", ingredientes_mecanismo: "Tecido de compressão graduada com infravermelho longo que estimula a microcirculação e reduz retenção de líquidos", tom: "premium" },
+  { nome: "VisionClear HD", nicho: "Visao", promessa_principal: "Proteger e melhorar a saúde dos olhos contra telas e envelhecimento", publico_alvo: "Pessoas 30-65 que usam telas por muitas horas ou sentem a visão cansada", beneficios: "Reduz fadiga ocular, protege contra luz azul, melhora visão noturna, previne degeneração macular", ingredientes_mecanismo: "Luteína + zeaxantina + astaxantina que filtra luz azul e regenera as células da retina", tom: "cientifico" },
+  { nome: "DeepSleep Restore", nicho: "Sono", promessa_principal: "Dormir profundamente em 20 minutos e acordar com energia total", publico_alvo: "Adultos 25-60 com insônia ou sono de má qualidade", beneficios: "Induz sono natural, aumenta fase REM, elimina despertar noturno, sem dependência", ingredientes_mecanismo: "Melatonina de liberação prolongada + L-teanina + magnésio bisglicinato que sincroniza o ciclo circadiano", tom: "humano" },
+  { nome: "ImunoPower Multi", nicho: "Suplemento Vitaminico", promessa_principal: "Blindar a imunidade e acabar com gripes frequentes de uma vez", publico_alvo: "Pessoas de todas as idades que ficam doentes com frequência ou querem prevenir", beneficios: "Fortalece defesas naturais, reduz frequência de gripes, mais energia, pele e cabelo saudáveis", ingredientes_mecanismo: "Complexo de vitamina C + D3 + zinco quelado + selênio que ativa as células NK e fortalece a barreira imunológica", tom: "direto" },
+];
+
+const getRandomExample = () => NICHE_EXAMPLES[Math.floor(Math.random() * NICHE_EXAMPLES.length)];
 
 const PROMISE_CHIPS = ["reduzir queda", "aumentar densidade", "engrossar fios", "acelerar crescimento", "eliminar dor", "mais energia", "emagrecer rapido"];
 const TONE_CHIPS = ["agressivo", "cientifico", "humano", "premium", "urgente", "provocativo"];
