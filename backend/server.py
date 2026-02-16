@@ -251,6 +251,15 @@ async def get_analysis(analysis_id: str, user=Depends(get_current_user)):
 class CompetitorURLInput(BaseModel):
     url: str
 
+class CreativeGenerationInput(BaseModel):
+    analysis_id: str
+    prompt: Optional[str] = ""
+    provider: str  # "nano_banana" | "gpt_image" | "claude_text"
+
+class PushSubscriptionInput(BaseModel):
+    endpoint: str
+    keys: dict
+
 class ComplianceCheckInput(BaseModel):
     text: str
 
