@@ -1254,6 +1254,78 @@ async def list_user_media(user=Depends(get_current_user)):
     ).sort("created_at", -1).to_list(50)
     return items
 
+HOOK_TEMPLATES = {
+    "vsl": "Estilo VSL (Video Sales Letter): Abra com um gancho forte e provocativo nos primeiros 3 segundos. Mostre o problema de forma visceral. Apresente a solução como descoberta única. Use urgência e escassez. Termine com CTA claro.",
+    "ugc": "Estilo UGC (User Generated Content): Câmera frontal, como se fosse um depoimento espontâneo. Iluminação natural, tom conversacional. A pessoa fala diretamente com a câmera sobre sua experiência. Cenário caseiro e autêntico.",
+    "before_after": "Estilo Before/After: Divida o vídeo em dois momentos claros - o antes (problema, frustração) e o depois (transformação, resultado). Transição dramática no meio. Mostre contraste visual forte.",
+    "depoimento": "Estilo Depoimento: Uma pessoa conta sua história real de transformação com o produto. Tom emocional, vulnerável no início, confiante no final. Close no rosto, sem cenário distrativo.",
+    "problema_solucao": "Estilo Problema-Solução: Comece mostrando a dor/problema de forma intensa. Pause. Apresente a solução como revelação. Demonstre o produto em ação. Termine com resultado e CTA.",
+}
+
+
+def build_contextual_prompt(product: dict, decision: dict, strategy: dict, hook_template: str, custom_prompt: str, provider: str) -> str:
+    v = decision.get("veredito") or decision.get("vencedor") or {}
+
+    hook = v.get("hook", "")
+    copy_text = v.get("copy", "")
+    roteiro = v.get("roteiro_ugc", "")
+
+    nicho = product.get("nicho", "")
+    nome = product.get("nome", "")
+    promessa = product.get("promessa_principal", "")
+    diferencial = product.get("diferencial", "")
+    publico = product.get("publico_alvo", "")
+
+    big_idea = ""
+    angulo = ""
+    dor = ""
+    if strategy:
+        big_idea = strategy.get("big_idea", "")
+        angulo = strategy.get("angulo_venda", "")
+        dor = strategy.get("dor_central", "")
+
+    # Start with custom prompt if provided
+    if custom_prompt:
+        base = custom_prompt
+    else:
+        if provider == "sora_video":
+            base = f"Vídeo publicitário profissional para '{nome}'"
+        else:
+            base = f"Criativo publicitário profissional para '{nome}'"
+
+    # Add hook template direction
+    template_text = HOOK_TEMPLATES.get(hook_template, "")
+    if template_text:
+        base += f"\n\nDireção criativa: {template_text}"
+
+    # Add contextual data from the analysis
+    context_parts = []
+    if nicho:
+        context_parts.append(f"Nicho: {nicho}")
+    if promessa:
+        context_parts.append(f"Promessa principal: {promessa}")
+    if diferencial:
+        context_parts.append(f"Diferencial: {diferencial}")
+    if publico:
+        context_parts.append(f"Público-alvo: {publico}")
+    if hook:
+        context_parts.append(f"Hook vencedor: {hook}")
+    if dor:
+        context_parts.append(f"Dor central: {dor}")
+    if big_idea:
+        context_parts.append(f"Big Idea: {big_idea}")
+    if angulo:
+        context_parts.append(f"Ângulo de venda: {angulo}")
+
+    if context_parts:
+        base += "\n\nContexto estratégico da análise:\n" + "\n".join(context_parts)
+
+    if roteiro and provider == "sora_video" and not custom_prompt:
+        base += f"\n\nRoteiro UGC de referência: {roteiro[:300]}"
+
+    return base
+
+
 # --- Creative Generation ---
 
 @api_router.post("/creatives/generate")
@@ -1266,9 +1338,34 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
 
     product = analysis["product"]
     decision = analysis.get("decision") or {}
+    strategy = analysis.get("strategic_analysis") or {}
     v = decision.get("veredito") or decision.get("vencedor") or {}
 
-    base_prompt = data.prompt or f"Anúncio profissional para '{product['nome']}' no nicho de {product['nicho']}. Promessa: {product['promessa_principal']}. Hook: {v.get('hook', '')}. Estilo: anúncio de tráfego pago, moderno, clean."
+    # Build contextual prompt
+    base_prompt = build_contextual_prompt(
+        product, decision, strategy,
+        data.hook_template or "",
+        data.prompt or "",
+        data.provider,
+    )
+
+    # Determine version number
+    version = 1
+    version_group = data.analysis_id  # group by analysis
+    if data.parent_creative_id:
+        parent = await db.creatives.find_one({"id": data.parent_creative_id}, {"_id": 0})
+        if parent:
+            version_group = parent.get("version_group", data.analysis_id)
+            version = (parent.get("version", 1)) + 1
+
+    # Count existing versions for this analysis+provider if no parent
+    if not data.parent_creative_id:
+        existing_count = await db.creatives.count_documents({
+            "analysis_id": data.analysis_id,
+            "provider": data.provider,
+            "user_id": user["id"],
+        })
+        version = existing_count + 1
 
     lang = request.headers.get("x-language", "pt")
     creative_id = str(uuid.uuid4())
