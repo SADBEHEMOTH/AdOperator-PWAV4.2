@@ -232,13 +232,24 @@ export default function DashboardPage() {
             </div>
             <p className="text-zinc-500 text-sm mb-2">Qual decisao voce precisa tomar hoje?</p>
             <p className="text-zinc-600 text-xs mb-6">Descreva seu produto e deixe o motor decidir o melhor anuncio.</p>
-            <Button
-              data-testid="first-analysis-button"
-              onClick={() => navigate("/analysis/new")}
-              className="bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] rounded-sm font-semibold"
-            >
-              Criar Primeira Analise
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button
+                data-testid="first-analysis-button"
+                onClick={() => navigate("/analysis/new")}
+                className="bg-white text-black hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] rounded-sm font-semibold"
+              >
+                Criar Primeira Analise
+              </Button>
+              <Button
+                data-testid="competitor-analysis-empty"
+                onClick={() => navigate("/competitor")}
+                variant="outline"
+                className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white rounded-sm"
+              >
+                <Search className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                Analisar Concorrente
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-3 animate-fade-in-up">
