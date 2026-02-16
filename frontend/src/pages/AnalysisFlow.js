@@ -592,7 +592,7 @@ export default function AnalysisFlow() {
             </>
           ) : (
             <>
-              Escolher o anuncio vencedor
+              Escolher o anúncio vencedor
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
