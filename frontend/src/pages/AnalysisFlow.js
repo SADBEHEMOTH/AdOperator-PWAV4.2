@@ -232,9 +232,9 @@ export default function AnalysisFlow() {
       const { data: shareData } = await api.post(`/analyses/${analysisId}/share`);
       const url = `${window.location.origin}/public/${shareData.public_token}`;
       await navigator.clipboard.writeText(url);
-      toast.success("Link publico copiado!");
+      toast.success(t("dec.share_copied"));
     } catch {
-      toast.error("Erro ao gerar link");
+      toast.error(t("dec.share_error"));
     }
   };
 
