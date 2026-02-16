@@ -328,7 +328,7 @@ export default function MarketComparePage() {
             {/* Action CTA */}
             <Button
               data-testid="generate-creative-from-advantage"
-              onClick={() => navigate("/analysis/new")}
+              onClick={() => navigate(`/analysis/${id}/creative`)}
               className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.12)] transition-all duration-300 rounded-sm h-14 font-bold text-sm tracking-wide"
             >
               {t("mkt.generate_creative")}

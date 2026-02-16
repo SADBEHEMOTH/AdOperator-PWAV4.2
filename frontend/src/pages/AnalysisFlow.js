@@ -261,7 +261,7 @@ export default function AnalysisFlow() {
   };
 
   const fillExample = () => {
-    setProduct(EXAMPLE_PRODUCT);
+    setProduct(getRandomExample());
     toast.success(t("flow.example_filled"));
   };
 
@@ -626,44 +626,44 @@ export default function AnalysisFlow() {
 
         {/* Strategy Table */}
         {strategyTable && (
-          <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-6 space-y-5 animate-fade-in-up" data-testid="strategy-table">
+          <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-3 sm:p-6 space-y-4 sm:space-y-5 animate-fade-in-up overflow-x-auto" data-testid="strategy-table">
             <div className="flex items-center gap-2 mb-2">
               <Users className="h-4 w-4 text-white" strokeWidth={1.5} />
               <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Estratégia por Perfil de Público</span>
             </div>
             <div className="space-y-4">
               {(strategyTable.perfis || []).map((p, i) => (
-                <div key={i} className="bg-zinc-950/30 rounded-sm p-4 space-y-3 border border-zinc-800/30">
-                  <div className="flex items-center gap-2">
+                <div key={i} className="bg-zinc-950/30 rounded-sm p-3 sm:p-4 space-y-3 border border-zinc-800/30 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm">{p.emoji}</span>
                     <span className="text-white text-sm font-medium">{p.nome}</span>
-                    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs ml-auto">{p.hook_recomendado}</Badge>
+                    <Badge variant="outline" className="text-zinc-500 border-zinc-800 text-xs sm:ml-auto">{p.hook_recomendado}</Badge>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-zinc-600 block mb-0.5">Abordagem</span>
-                      <span className="text-zinc-300">{p.abordagem}</span>
+                      <span className="text-zinc-300 break-words">{p.abordagem}</span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-zinc-600 block mb-0.5">Motivação</span>
-                      <span className="text-zinc-300">{p.motivacao}</span>
+                      <span className="text-zinc-300 break-words">{p.motivacao}</span>
                     </div>
                   </div>
-                  <div className="text-xs">
+                  <div className="text-xs min-w-0">
                     <span className="text-zinc-600 block mb-0.5">Roteiro</span>
-                    <span className="text-zinc-400">{p.roteiro}</span>
+                    <span className="text-zinc-400 break-words">{p.roteiro}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="min-w-0">
                       <span className="text-emerald-400/60 block mb-0.5">Pontos fortes</span>
                       {(p.pontos_fortes || []).map((pf, j) => (
-                        <span key={j} className="text-zinc-400 block">+ {pf}</span>
+                        <span key={j} className="text-zinc-400 block break-words">+ {pf}</span>
                       ))}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-amber-400/60 block mb-0.5">Pontos fracos</span>
                       {(p.pontos_fracos || []).map((pf, j) => (
-                        <span key={j} className="text-zinc-500 block">- {pf}</span>
+                        <span key={j} className="text-zinc-500 block break-words">- {pf}</span>
                       ))}
                     </div>
                   </div>
@@ -672,7 +672,7 @@ export default function AnalysisFlow() {
             </div>
             {strategyTable.recomendacao_geral && (
               <div className="bg-white/5 border border-white/10 rounded-sm p-3">
-                <span className="text-white text-xs font-medium">{strategyTable.recomendacao_geral}</span>
+                <span className="text-white text-xs font-medium break-words">{strategyTable.recomendacao_geral}</span>
               </div>
             )}
           </div>
