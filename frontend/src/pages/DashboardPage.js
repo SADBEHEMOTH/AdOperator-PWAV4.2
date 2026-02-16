@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical, Zap, AlertTriangle, TrendingUp, ArrowRight } from "lucide-react";
+import { Plus, LogOut, ChevronRight, Clock, User, Crosshair, Trash2, MoreVertical, Zap, AlertTriangle, TrendingUp, ArrowRight, BarChart3, Search } from "lucide-react";
 import { toast } from "sonner";
 
 const statusLabels = {
