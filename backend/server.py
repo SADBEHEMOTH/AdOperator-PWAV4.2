@@ -1119,7 +1119,6 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
         raise HTTPException(status_code=404, detail="Análise não encontrada")
 
     product = analysis["product"]
-    strategy = analysis.get("strategic_analysis", {})
     decision = analysis.get("decision", {})
     v = decision.get("veredito") or decision.get("vencedor") or {}
 
