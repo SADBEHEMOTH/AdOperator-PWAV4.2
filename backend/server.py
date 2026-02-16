@@ -867,6 +867,113 @@ async def list_competitor_analyses(user=Depends(get_current_user)):
     ).sort("created_at", -1).to_list(50)
     return items
 
+# --- Radar de Tendências Endpoint ---
+
+@api_router.post("/radar/generate")
+async def generate_radar(request: Request, user=Depends(get_current_user)):
+    analyses = await db.analyses.find(
+        {"user_id": user["id"], "status": "completed"}, {"_id": 0}
+    ).sort("created_at", -1).to_list(20)
+
+    if not analyses:
+        raise HTTPException(status_code=400, detail="Você precisa de pelo menos uma análise concluída para gerar o radar")
+
+    niches = list(set(a["product"]["nicho"] for a in analyses if a.get("product", {}).get("nicho")))
+    products = [a["product"]["nome"] for a in analyses[:5]]
+    strategies = []
+    for a in analyses[:5]:
+        s = a.get("strategic_analysis", {})
+        d = a.get("decision", {})
+        v = d.get("veredito") or d.get("vencedor") or {}
+        strategies.append({
+            "produto": a["product"]["nome"],
+            "nicho": a["product"]["nicho"],
+            "angulo": s.get("angulo_venda", ""),
+            "big_idea": s.get("big_idea", ""),
+            "hook_vencedor": v.get("hook", ""),
+            "fraquezas": d.get("fraquezas", []),
+        })
+
+    market_data = []
+    for a in analyses[:3]:
+        mc = a.get("market_comparison")
+        if mc:
+            market_data.append(mc.get("comparativo_usuario", {}))
+
+    lang = request.headers.get("x-language", "pt")
+
+    system_msg = """Você é um consultor estratégico de tráfego pago que gera briefings semanais de tendências.
+Analise os dados acumulados do usuário (análises, estratégias, nichos) e gere um radar de tendências.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "resumo": "string - resumo executivo em 2-3 frases do estado atual do mercado do usuário",
+  "mudancas_mercado": [
+    {
+      "mudanca": "string - o que mudou ou está mudando",
+      "impacto": "positivo | negativo | neutro",
+      "recomendacao": "string - o que fazer a respeito"
+    }
+  ],
+  "padroes_emergentes": [
+    {
+      "padrao": "string - padrão identificado",
+      "relevancia": "alta | media | baixa",
+      "descricao": "string - por que isso importa"
+    }
+  ],
+  "recomendacoes": [
+    {
+      "acao": "string - ação recomendada",
+      "prioridade": "urgente | importante | opcional",
+      "motivo": "string - por que fazer isso agora"
+    }
+  ],
+  "pontuacao_saude": {
+    "score": 75,
+    "label": "string - ex: Bom / Excelente / Precisa de atenção",
+    "detalhe": "string - explicação breve"
+  }
+}
+Retorne SOMENTE o JSON."""
+
+    user_text = f"""DADOS ACUMULADOS DO USUÁRIO:
+
+Nichos: {', '.join(niches)}
+Produtos analisados: {', '.join(products)}
+
+ESTRATÉGIAS USADAS:
+{json.dumps(strategies, ensure_ascii=False)}
+
+DADOS DE MERCADO COLETADOS:
+{json.dumps(market_data, ensure_ascii=False) if market_data else 'Nenhum dado de mercado coletado ainda.'}
+
+Gere um briefing semanal com tendências, mudanças e recomendações práticas."""
+
+    result = await call_claude(system_msg, user_text, f"radar-{user['id']}", lang)
+
+    radar_id = str(uuid.uuid4())
+    doc = {
+        "id": radar_id,
+        "user_id": user["id"],
+        "result": result,
+        "niches": niches,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.radars.insert_one(doc)
+
+    return {"id": radar_id, **result, "created_at": doc["created_at"]}
+
+@api_router.get("/radar/latest")
+async def get_latest_radar(user=Depends(get_current_user)):
+    radar = await db.radars.find_one(
+        {"user_id": user["id"]}, {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    if not radar:
+        return None
+    return {"id": radar["id"], **radar.get("result", {}), "created_at": radar["created_at"]}
+
 # --- App Setup ---
 
 app.include_router(api_router)
