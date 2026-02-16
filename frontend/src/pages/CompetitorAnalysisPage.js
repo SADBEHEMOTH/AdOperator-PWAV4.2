@@ -233,7 +233,7 @@ export default function CompetitorAnalysisPage() {
             {/* CTAs Found */}
             {dados?.ctas_encontrados && dados.ctas_encontrados.length > 0 && (
               <div className="bg-zinc-900/20 border border-zinc-800/30 rounded-md p-4">
-                <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block mb-2">CTAs encontrados</span>
+                <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest block mb-2">{t("comp.ctas_found")}</span>
                 <div className="flex flex-wrap gap-2">
                   {dados.ctas_encontrados.map((cta, i) => (
                     <Badge key={i} variant="outline" className="text-zinc-300 border-zinc-700 text-xs">{cta}</Badge>
