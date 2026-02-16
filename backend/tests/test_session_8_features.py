@@ -312,8 +312,9 @@ class TestCreativeGenerationPageCode:
         
         assert "sora_video" in content, "Missing sora_video provider"
         assert "Sora 2" in content, "Missing Sora 2 label"
-        assert 'data-testid="provider-sora_video"' in content, \
-            "Missing data-testid='provider-sora_video'"
+        # data-testid is generated dynamically as data-testid={`provider-${p.id}`}
+        assert 'data-testid={`provider-${p.id}`}' in content, \
+            "Missing dynamic data-testid for providers"
         
         print("SUCCESS: Sora 2 video provider exists in code")
 
