@@ -24,41 +24,68 @@ Web application "AdOperator" - a decision engine that transforms product descrip
 6. Final Result (winning ad, LP structure, compatible audience)
 7. User Authentication (JWT login/register)
 8. History of past analyses
+9. Market Comparison (niche analysis, dominant patterns, competitor differences)
+10. Competitor Analysis (URL scraping, strategic extraction)
 
-## What's Been Implemented (Feb 2026)
+## What's Been Implemented
+
+### Core Features (Feb 2026)
 - Full JWT authentication (register, login, token validation)
-- **Two input modes**: Quick (3 fields) and Complete (7 fields) with tab switcher
-- **Clickable chips** under promessa field + tone chips for quick selection
-- **Auto-fill** "Gerar exemplo" button + **Time indicator** (~45s)
-- **Compliance checker**: Risky terms detection with rewrite suggestions + score
-- **Experiment-format ad cards**: Hypothesis, target audience, strengths/weaknesses, predictive metrics (CTR, curiosity, block risk)
-- **Structurally diverse ads**: Personal story / Unexpected discovery / Attack on common mistake
-- **4-layer audience simulation**: Emotional reaction, 2s thought, probable decision, "what would make them click" + conflict detection + general trend
-- **Verdict-first decision**: Big headline, causal explanation, consequences of wrong choices, R$2000 recommendation
-- **Loop system**: Melhorar/Nova variacao/improvement chips, improve endpoint
-- **Live dashboard panel**: Current state, alerts, recommendations
-- **Staged loading**: Progressive feedback messages during AI processing
+- Two input modes: Quick (3 fields) and Complete (7 fields) with tab switcher
+- Clickable chips + Auto-fill example + Time indicator (~45s)
+- Compliance checker: Risky terms detection with rewrite suggestions
+- Experiment-format ad cards with predictive metrics
+- 4-layer audience simulation with conflict detection
+- Verdict-first decision engine with causal explanation
+- Loop system: Melhorar/Nova variacao/improvement chips
+- Live dashboard panel with active product state
 - Copy to clipboard, Share via public link, PDF export, Delete analysis
 - Dark minimalist UI (Manrope/Inter/JetBrains Mono)
 
+### PASSO 1 - Market & Competitor Analysis (Feb 16, 2026)
+- **Enhanced Dashboard**: Live panel shows "Produto Ativo" with strategy, biggest weakness, recommended next action, and 3 action buttons: "Melhorar anúncio", "Comparar com mercado", "Analisar concorrente"
+- **Market Comparison** (/analysis/:id/market): AI-powered niche market analysis showing hook distribution, dominant patterns, persistent ads, and user vs market comparison with competitive advantage
+- **Competitor Analysis** (/competitor): URL scraping + AI analysis extracting: tipo de abertura, promessa, mecanismo, prova, CTA, psicologia, risco de bloqueio, formato visual. Shows interpretation: what it does, why it works, where it loses strength, how to beat it. CTA: "CRIAR VERSÃO SUPERIOR"
+- **Backend utilities**: Hook type classification (pergunta/historia/lista/prova_social/mecanismo/choque), block risk detection, web scraping with BeautifulSoup4
+
+## Key Routes
+- `/` - Dashboard (live panel + history)
+- `/login` - Auth
+- `/analysis/new` - New analysis flow
+- `/analysis/:id` - Result page
+- `/analysis/:id/market` - Market comparison
+- `/competitor` - Competitor URL analysis
+- `/public/:token` - Public shared result
+
+## Key API Endpoints
+- `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
+- `POST /api/analyses` - Create analysis
+- `POST /api/analyses/:id/parse` - Strategic parser
+- `POST /api/analyses/:id/generate` - Generate ad variations
+- `POST /api/analyses/:id/simulate` - Audience simulation
+- `POST /api/analyses/:id/decide` - Decision engine
+- `POST /api/analyses/:id/improve` - Create improvement iteration
+- `POST /api/analyses/:id/market-compare` - Market comparison
+- `POST /api/competitor/analyze` - Analyze competitor URL
+- `GET /api/competitor/analyses` - List past competitor analyses
+
 ## Prioritized Backlog
-### P0 (Critical)
-- All core features implemented
 
-### P1 (High)
-- AI-enhanced compliance rewrite suggestions (auto-suggest safer alternatives)
+### P0 (Remaining PASSO 1 tasks)
+- **Etapa Estratégia Operacional**: Tabela comparativa por perfil de público (abordagem, motivação, roteiro, pontos fortes/fracos)
+- **Solicitar Mídia**: Upload de imagem/vídeo do produto após estratégia
+- **Geração de Criativos**: Gerar fotos e hooks de vídeo (Nano Banana, GPT Image 1 + 1 more)
+- **Fluxo Final Acionável**: Todo fluxo termina com ação, nunca "voltar ao início"
+
+### P1 (PASSO 2 - PWA)
+- manifest.json configuration
+- Service worker (stale-while-revalidate for assets, network-first for APIs)
+- Install prompt ("Add to Home Screen")
+- Offline loading with warning message
+
+### P2 (Future)
+- AI-enhanced compliance rewrite suggestions
 - A/B testing tracking integration
-- Multi-language ad generation
-
-### P2 (Medium)
+- Multi-language ad generation (EN/ES)
 - Team collaboration features
 - Template library for common niches
-- Version history for analyses
-- Analytics dashboard for conversion tracking
-- Webhook integration for external platforms
-
-## Next Tasks
-- Integrate compliance scorer with AI rewrite suggestions
-- Add multi-language support (EN/ES)
-- Consider A/B testing tracking module
-- Team workspace with shared analyses
