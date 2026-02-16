@@ -293,14 +293,14 @@ export default function MarketComparePage() {
                 </div>
 
                 <div className="bg-blue-400/5 border border-blue-400/15 rounded-md p-5 space-y-1">
-                  <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">Onde você difere</span>
+                  <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">{t("mkt.where_differ")}</span>
                   <p className="text-zinc-300 text-sm leading-relaxed">{comp.onde_usuario_difere}</p>
                 </div>
 
                 <div className="bg-emerald-400/5 border border-emerald-400/15 rounded-md p-5 space-y-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Zap className="h-3.5 w-3.5 text-emerald-400" strokeWidth={1.5} />
-                    <span className="text-xs font-mono text-emerald-400 uppercase tracking-widest">Sua Vantagem Competitiva</span>
+                    <span className="text-xs font-mono text-emerald-400 uppercase tracking-widest">{t("mkt.advantage")}</span>
                   </div>
                   <p className="text-zinc-300 text-sm leading-relaxed">{comp.vantagem_competitiva}</p>
                 </div>
@@ -308,7 +308,7 @@ export default function MarketComparePage() {
                 <div className="bg-amber-400/5 border border-amber-400/15 rounded-md p-5 space-y-1">
                   <div className="flex items-center gap-2 mb-1">
                     <AlertTriangle className="h-3.5 w-3.5 text-amber-400" strokeWidth={1.5} />
-                    <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">Risco de parecer genérico</span>
+                    <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">{t("mkt.generic_risk")}</span>
                   </div>
                   <p className="text-zinc-300 text-sm leading-relaxed">{comp.risco_generico}</p>
                 </div>
@@ -316,7 +316,7 @@ export default function MarketComparePage() {
                 <div className="bg-white/5 border border-white/10 rounded-md p-5 space-y-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Target className="h-3.5 w-3.5 text-white" strokeWidth={1.5} />
-                    <span className="text-xs font-mono text-white uppercase tracking-widest">Recomendação Prática</span>
+                    <span className="text-xs font-mono text-white uppercase tracking-widest">{t("mkt.recommendation")}</span>
                   </div>
                   <p className="text-zinc-300 text-sm leading-relaxed">{comp.recomendacao_pratica}</p>
                 </div>
@@ -331,7 +331,7 @@ export default function MarketComparePage() {
               onClick={() => navigate("/analysis/new")}
               className="w-full bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.12)] transition-all duration-300 rounded-sm h-14 font-bold text-sm tracking-wide"
             >
-              GERAR CRIATIVO BASEADO NA VANTAGEM
+              {t("mkt.generate_creative")}
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
 
@@ -348,7 +348,7 @@ export default function MarketComparePage() {
                   {loadingMsg}
                 </>
               ) : (
-                "Escanear novamente"
+                t("mkt.rescan")
               )}
             </Button>
           </div>
