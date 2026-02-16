@@ -278,6 +278,98 @@ async def get_public_analysis(token: str):
     analysis.pop("user_id", None)
     return analysis
 
+# --- Web Scraping & Text Analysis Utilities ---
+
+HOOK_PATTERNS = {
+    "pergunta": ["?", "você sabe", "já pensou", "por que", "como"],
+    "historia": ["eu", "minha", "descobri", "quando", "lembro", "história"],
+    "lista": ["3 ", "5 ", "7 ", "10 ", "passo", "dica", "motivo"],
+    "prova_social": ["milhares", "pessoas", "resultado", "depoimento", "cliente", "vendido"],
+    "mecanismo": ["funciona", "método", "sistema", "tecnologia", "fórmula", "segredo"],
+    "choque": ["pare", "cuidado", "perigo", "alerta", "nunca", "erro", "mentira"],
+}
+
+BLOCK_RISK_TERMS = [
+    "cura", "curar", "100%", "garantido", "milagroso", "elimina",
+    "sem efeitos colaterais", "nunca mais", "para sempre", "definitivo",
+    "comprovado cientificamente", "médicos recomendam", "aprovado pela anvisa",
+]
+
+def classify_hook_type(text: str) -> str:
+    text_lower = text.lower()
+    scores = {}
+    for hook_type, keywords in HOOK_PATTERNS.items():
+        scores[hook_type] = sum(1 for k in keywords if k in text_lower)
+    best = max(scores, key=scores.get)
+    return best if scores[best] > 0 else "direto"
+
+def detect_block_risk(text: str) -> dict:
+    text_lower = text.lower()
+    found = [t for t in BLOCK_RISK_TERMS if t in text_lower]
+    if len(found) >= 3:
+        level = "alto"
+    elif len(found) >= 1:
+        level = "medio"
+    else:
+        level = "baixo"
+    return {"level": level, "terms": found}
+
+async def scrape_url(url: str) -> dict:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+    except Exception as e:
+        logger.error(f"Scrape failed for {url}: {e}")
+        raise HTTPException(status_code=400, detail=f"Não foi possível acessar a URL: {str(e)}")
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    for tag in soup(["script", "style", "nav", "footer", "iframe"]):
+        tag.decompose()
+
+    title = soup.title.string.strip() if soup.title and soup.title.string else ""
+    meta_desc = ""
+    meta_tag = soup.find("meta", attrs={"name": "description"})
+    if meta_tag and meta_tag.get("content"):
+        meta_desc = meta_tag["content"]
+
+    headings = [h.get_text(strip=True) for h in soup.find_all(["h1", "h2", "h3"]) if h.get_text(strip=True)]
+    paragraphs = [p.get_text(strip=True) for p in soup.find_all("p") if len(p.get_text(strip=True)) > 20]
+    buttons = [b.get_text(strip=True) for b in soup.find_all(["button", "a"]) if b.get_text(strip=True) and len(b.get_text(strip=True)) < 80]
+
+    images = []
+    for img in soup.find_all("img", src=True)[:10]:
+        src = img["src"]
+        if src.startswith("//"):
+            src = "https:" + src
+        elif src.startswith("/"):
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            src = f"{parsed.scheme}://{parsed.netloc}{src}"
+        images.append({"src": src, "alt": img.get("alt", "")})
+
+    full_text = " ".join([title, meta_desc] + headings[:5] + paragraphs[:15])
+    hook_type = classify_hook_type(full_text)
+    block_risk = detect_block_risk(full_text)
+
+    return {
+        "url": url,
+        "title": title,
+        "meta_description": meta_desc,
+        "headings": headings[:10],
+        "paragraphs": paragraphs[:20],
+        "buttons_ctas": [b for b in buttons if any(w in b.lower() for w in ["comprar", "saiba", "quero", "garanta", "agora", "teste", "grátis", "free", "clique", "acesse", "cadastr", "inscreva", "baixe"])][:8] or buttons[:5],
+        "images": images,
+        "hook_type_detected": hook_type,
+        "block_risk": block_risk,
+        "text_length": len(full_text),
+        "full_text_preview": full_text[:3000],
+    }
+
 # --- AI Pipeline Endpoints ---
 
 @api_router.post("/analyses/{analysis_id}/parse")
