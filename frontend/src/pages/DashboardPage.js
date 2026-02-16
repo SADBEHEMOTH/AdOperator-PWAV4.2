@@ -117,6 +117,21 @@ export default function DashboardPage() {
 
         <Separator className="bg-zinc-800/50 mb-8" />
 
+        {/* Quick Actions - Always visible when no live panel */}
+        {!loading && analyses.length > 0 && !analyses.find(a => a.status === "completed") && (
+          <div className="mb-6 flex gap-3 animate-fade-in-up">
+            <Button
+              data-testid="competitor-analysis-quick"
+              onClick={() => navigate("/competitor")}
+              variant="outline"
+              className="border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white rounded-sm font-semibold text-xs h-10"
+            >
+              <Search className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+              Analisar concorrente
+            </Button>
+          </div>
+        )}
+
         {/* LIVE PANEL - Current State */}
         {!loading && analyses.length > 0 && (() => {
           const latest = analyses.find(a => a.status === "completed");
