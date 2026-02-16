@@ -415,7 +415,8 @@ Promessa principal: {product['promessa_principal']}"""
     if product.get('tom'):
         user_text += f"\nTom desejado: {product['tom']}"
 
-    result = await call_claude(system_msg, user_text, f"parse-{analysis_id}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"parse-{analysis_id}", lang)
 
     # Run compliance check on product text
     all_text = " ".join([v for v in product.values() if isinstance(v, str) and v])
@@ -498,7 +499,8 @@ Objeções: {json.dumps(strategy.get('objecoes', []), ensure_ascii=False)}
 Big idea: {strategy.get('big_idea', '')}
 Mecanismo percebido: {strategy.get('mecanismo_percebido', '')}"""
 
-    result = await call_claude(system_msg, user_text, f"generate-{analysis_id}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"generate-{analysis_id}", lang)
 
     await db.analyses.update_one(
         {"id": analysis_id},
@@ -563,7 +565,8 @@ Retorne SOMENTE o JSON."""
     ads_text = json.dumps(ads, ensure_ascii=False)
     user_text = f"Analise os seguintes anúncios e simule as reações dos 4 perfis para cada um:\n\n{ads_text}"
 
-    result = await call_claude(system_msg, user_text, f"simulate-{analysis_id}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"simulate-{analysis_id}", lang)
 
     await db.analyses.update_one(
         {"id": analysis_id},
@@ -637,7 +640,8 @@ Retorne SOMENTE o JSON."""
 SIMULAÇÃO DE PÚBLICO:
 {json.dumps(simulation, ensure_ascii=False)}"""
 
-    result = await call_claude(system_msg, user_text, f"decide-{analysis_id}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"decide-{analysis_id}", lang)
 
     await db.analyses.update_one(
         {"id": analysis_id},
@@ -771,7 +775,8 @@ Copy: {user_copy}
 
 Analise o mercado deste nicho e compare com a estratégia do usuário. Gere 5-7 exemplos de anúncios típicos do mercado."""
 
-    result = await call_claude(system_msg, user_text, f"market-{analysis_id}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, user_text, f"market-{analysis_id}", lang)
 
     await db.analyses.update_one(
         {"id": analysis_id},
@@ -833,7 +838,8 @@ CTAs/BOTÕES ENCONTRADOS:
 TIPO DE HOOK DETECTADO (automático): {scraped['hook_type_detected']}
 RISCO DE BLOQUEIO (automático): {scraped['block_risk']['level']} - termos: {', '.join(scraped['block_risk']['terms'][:5])}"""
 
-    result = await call_claude(system_msg, content_text, f"competitor-{uuid.uuid4()}")
+    lang = request.headers.get("x-language", "pt")
+    result = await call_claude(system_msg, content_text, f"competitor-{uuid.uuid4()}", lang)
 
     result["scraping_data"] = {
         "url": scraped["url"],
