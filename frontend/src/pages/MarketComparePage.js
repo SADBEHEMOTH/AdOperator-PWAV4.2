@@ -203,7 +203,7 @@ export default function MarketComparePage() {
               <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <TrendingUp className="h-4 w-4 text-white" strokeWidth={1.5} />
-                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">Padrões Dominantes</span>
+                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">{t("mkt.patterns")}</span>
                 </div>
                 <div className="space-y-4">
                   {result.padroes_dominantes.map((p, i) => (
