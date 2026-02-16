@@ -715,7 +715,7 @@ export default function AnalysisFlow() {
             </>
           ) : (
             <>
-              Rodar simulacao
+              Rodar simulação
               <ChevronRight className="ml-2 h-4 w-4" />
             </>
           )}
