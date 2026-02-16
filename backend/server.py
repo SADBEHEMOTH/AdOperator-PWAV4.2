@@ -663,6 +663,195 @@ async def improve_analysis(analysis_id: str, user=Depends(get_current_user)):
     doc.pop("_id", None)
     return doc
 
+# --- Market Comparison Endpoint ---
+
+@api_router.post("/analyses/{analysis_id}/market-compare")
+async def market_compare(analysis_id: str, user=Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
+    )
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Análise não encontrada")
+
+    product = analysis["product"]
+    strategy = analysis.get("strategic_analysis")
+    decision = analysis.get("decision")
+    ads = analysis.get("ad_variations")
+
+    if not strategy:
+        raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
+
+    user_hook = ""
+    user_copy = ""
+    if decision:
+        v = decision.get("veredito") or decision.get("vencedor") or {}
+        user_hook = v.get("hook", "")
+        user_copy = v.get("copy", "")
+    elif ads and ads.get("anuncios"):
+        user_hook = ads["anuncios"][0].get("hook", "")
+        user_copy = ads["anuncios"][0].get("copy", "")
+
+    system_msg = """Você é um analista de inteligência de mercado especializado em tráfego pago e anúncios digitais.
+Sua tarefa é analisar o mercado do nicho do produto e gerar uma comparação realista com a estratégia do usuário.
+
+Baseie-se no seu conhecimento sobre padrões reais de anúncios no mercado brasileiro de tráfego pago.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "anuncios_mercado": [
+    {
+      "titulo": "string - nome descritivo do padrão de anúncio",
+      "texto_exemplo": "string - texto exemplo realista de anúncio do mercado",
+      "tipo_hook": "pergunta | historia | lista | prova_social | mecanismo | choque",
+      "status": "ativo",
+      "persistencia_estimada": "string - ex: 30+ dias (indica que funciona)",
+      "risco_bloqueio": "baixo | medio | alto",
+      "promessa": "string - promessa central do anúncio",
+      "cta": "string - call to action usado",
+      "psicologia": "string - mecanismo psicológico principal"
+    }
+  ],
+  "padroes_dominantes": [
+    {
+      "padrao": "string - nome do padrão",
+      "frequencia": "string - ex: presente em 60% dos anúncios",
+      "descricao": "string - como esse padrão funciona",
+      "exemplo": "string - exemplo concreto"
+    }
+  ],
+  "anuncios_persistentes": [
+    {
+      "descricao": "string - tipo de anúncio que permanece ativo por mais tempo",
+      "duracao_estimada": "string - ex: 45+ dias",
+      "motivo_persistencia": "string - por que continua rodando"
+    }
+  ],
+  "comparativo_usuario": {
+    "como_mercado_vende": "string - resumo de como o mercado vende neste nicho",
+    "onde_usuario_difere": "string - principais diferenças da estratégia do usuário",
+    "vantagem_competitiva": "string - onde o usuário tem vantagem sobre o mercado",
+    "risco_generico": "string - onde o usuário pode parecer genérico",
+    "recomendacao_pratica": "string - ação prática baseada na análise"
+  },
+  "hooks_por_tipo": {
+    "pergunta": "number - porcentagem estimada",
+    "historia": "number",
+    "lista": "number",
+    "prova_social": "number",
+    "mecanismo": "number",
+    "choque": "number"
+  }
+}
+Retorne SOMENTE o JSON."""
+
+    user_text = f"""PRODUTO DO USUÁRIO:
+Nome: {product['nome']}
+Nicho: {product['nicho']}
+Promessa: {product['promessa_principal']}
+Público-alvo: {product.get('publico_alvo', 'Não especificado')}
+
+ESTRATÉGIA ATUAL DO USUÁRIO:
+Nível de consciência: {strategy.get('nivel_consciencia', '')}
+Dor central: {strategy.get('dor_central', '')}
+Ângulo de venda: {strategy.get('angulo_venda', '')}
+Big idea: {strategy.get('big_idea', '')}
+
+ANÚNCIO ATUAL DO USUÁRIO:
+Hook: {user_hook}
+Copy: {user_copy}
+
+Analise o mercado deste nicho e compare com a estratégia do usuário. Gere 5-7 exemplos de anúncios típicos do mercado."""
+
+    result = await call_claude(system_msg, user_text, f"market-{analysis_id}")
+
+    await db.analyses.update_one(
+        {"id": analysis_id},
+        {"$set": {"market_comparison": result}}
+    )
+    return result
+
+# --- Competitor Analysis Endpoint ---
+
+@api_router.post("/competitor/analyze")
+async def analyze_competitor(data: CompetitorURLInput, user=Depends(get_current_user)):
+    scraped = await scrape_url(data.url)
+
+    system_msg = """Você é um analista estratégico de anúncios digitais.
+Analise o conteúdo desta página/anúncio de um concorrente e extraia uma análise estratégica completa.
+
+Retorne APENAS JSON válido (sem markdown):
+{
+  "analise": {
+    "tipo_abertura": "string - como o anúncio/página abre (pergunta, história, choque, dados, etc.)",
+    "promessa": "string - promessa central feita ao visitante",
+    "mecanismo": "string - como o produto/serviço afirma funcionar",
+    "prova": "string - que tipo de prova social ou evidência é usada",
+    "cta": "string - call to action principal",
+    "psicologia_utilizada": "string - técnicas psicológicas identificadas (escassez, autoridade, etc.)",
+    "risco_bloqueio": "baixo | medio | alto",
+    "formato_visual": "string - descrição do formato visual (vídeo, imagem, texto longo, etc.)"
+  },
+  "interpretacao": {
+    "o_que_tenta_fazer": "string - objetivo real do anúncio/página",
+    "por_que_pode_funcionar": "string - pontos fortes da abordagem",
+    "onde_perde_forca": "string - fraquezas identificadas",
+    "como_superar": "string - estratégia para criar algo superior"
+  },
+  "dados_coletados": {
+    "titulo_pagina": "string",
+    "hook_principal": "string - gancho principal identificado",
+    "tipo_hook": "pergunta | historia | lista | prova_social | mecanismo | choque",
+    "ctas_encontrados": ["strings"],
+    "elementos_persuasao": ["strings - elementos de persuasão encontrados"],
+    "palavras_chave": ["strings - 5-10 palavras-chave do conteúdo"]
+  }
+}
+Retorne SOMENTE o JSON."""
+
+    content_text = f"""URL: {scraped['url']}
+Título: {scraped['title']}
+Meta Description: {scraped['meta_description']}
+
+HEADINGS:
+{chr(10).join(scraped['headings'][:8])}
+
+CONTEÚDO PRINCIPAL:
+{chr(10).join(scraped['paragraphs'][:15])}
+
+CTAs/BOTÕES ENCONTRADOS:
+{', '.join(scraped['buttons_ctas'][:10])}
+
+TIPO DE HOOK DETECTADO (automático): {scraped['hook_type_detected']}
+RISCO DE BLOQUEIO (automático): {scraped['block_risk']['level']} - termos: {', '.join(scraped['block_risk']['terms'][:5])}"""
+
+    result = await call_claude(system_msg, content_text, f"competitor-{uuid.uuid4()}")
+
+    result["scraping_data"] = {
+        "url": scraped["url"],
+        "hook_type_auto": scraped["hook_type_detected"],
+        "block_risk_auto": scraped["block_risk"],
+        "images_found": len(scraped["images"]),
+    }
+
+    comp_id = str(uuid.uuid4())
+    doc = {
+        "id": comp_id,
+        "user_id": user["id"],
+        "url": data.url,
+        "result": result,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.competitor_analyses.insert_one(doc)
+
+    return {"id": comp_id, **result}
+
+@api_router.get("/competitor/analyses")
+async def list_competitor_analyses(user=Depends(get_current_user)):
+    items = await db.competitor_analyses.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    return items
+
 # --- App Setup ---
 
 app.include_router(api_router)
