@@ -122,6 +122,39 @@ export default function AnalysisFlow() {
     }
   }, [searchParams, loadAnalysis]);
 
+  const loadStrategyTable = async () => {
+    if (!analysisId) return;
+    setStrategyTableLoading(true);
+    try {
+      const { data: result } = await api.post(`/analyses/${analysisId}/strategy-table`);
+      setStrategyTable(result);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erro ao gerar tabela estratégica");
+    } finally {
+      setStrategyTableLoading(false);
+    }
+  };
+
+  const handleMediaUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMedia(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const { data: result } = await api.post("/media/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setUploadedMedia((prev) => [...prev, { ...result, original_name: file.name }]);
+      toast.success("Mídia enviada!");
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erro ao enviar mídia");
+    } finally {
+      setUploadingMedia(false);
+      e.target.value = "";
+    }
+  };
+
   const startStagedLoading = useCallback((stages) => {
     setLoading(true);
     setLoadingMessage(stages[0]);
