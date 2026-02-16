@@ -110,6 +110,7 @@ export default function AnalysisFlow() {
         completed: 4,
       };
       setStep(statusStep[analysis.status] || 0);
+      if (analysis.strategy_table) setStrategyTable(analysis.strategy_table);
     } catch {
       toast.error("Analise nao encontrada");
     }
