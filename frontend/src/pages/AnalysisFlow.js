@@ -223,7 +223,7 @@ export default function AnalysisFlow() {
   const copyText = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
-    toast.success("Copiado!");
+    toast.success(t("dec.copied"));
     setTimeout(() => setCopied(null), 2000);
   };
 
