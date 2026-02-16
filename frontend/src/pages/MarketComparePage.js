@@ -285,7 +285,7 @@ export default function MarketComparePage() {
             {/* Comparative: User vs Market */}
             {comp && (
               <div className="space-y-4">
-                <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 block">Sua Estratégia vs Mercado</span>
+                <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 block">{t("mkt.vs_market")}</span>
 
                 <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-md p-5 space-y-1">
                   <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Como o mercado vende</span>
