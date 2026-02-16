@@ -65,6 +65,9 @@ const LOADING_STAGES = {
 };
 
 export default function AnalysisFlow() {
+  const { t } = useLanguage();
+  const STEP_TITLES = getStepTitles(t);
+  const STEP_DESCRIPTIONS = getStepDescriptions(t);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
