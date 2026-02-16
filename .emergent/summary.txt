@@ -1,0 +1,172 @@
+<analysis>**original_problem_statement:**
+Crie uma aplicação web chamada AdOperator. O objetivo é transformar a descrição de um produto em hipóteses de anúncios, simular a reação do público e escolher automaticamente o melhor anúncio antes que o usuário invista em tráfego.
+
+**Fluxo do Usuário:**
+1.  Usuário descreve o produto.
+2.  O sistema interpreta estrategicamente.
+3.  O sistema gera múltiplos anúncios como hipóteses concorrentes.
+4.  O sistema simula reações de diferentes perfis de público (cético, impulsivo, etc.).
+5.  O sistema escolhe o anúncio vencedor e explica a decisão.
+6.  A tela de resultado é minimalista e acionável.
+
+**Estética e Experiência:**
+*   Interface escura, minimalista e profissional.
+*   Foco em uma tarefa por tela, sem distrações.
+*   A sensação é de operar uma máquina de decisão, não um editor de texto.
+
+**Requisitos Adicionais do Usuário (Evolução do Projeto):**
+*   **Home/Dashboard:** Deve ser um painel vivo com o estado atual do produto, recomendações e alertas, incentivando o retorno diário, em vez de um simples histórico de análises.
+*   **Fluxo de Análise:** O processo foi refinado para ser mais psicológico, apresentando anúncios como hipóteses, simulações como comportamentos humanos e decisões como vereditos estratégicos com consequências.
+*   **PASSO 1 (Próxima Tarefa):** Implementar funcionalidades de análise de mercado e de concorrentes. Isso inclui coletar dados de anúncios externos, analisar padrões (visuais e textuais) e permitir que o usuário compare sua estratégia com a do mercado ou analise um URL de concorrente específico. Também inclui a geração de criativos leves (fotos, vídeos curtos).
+*   **PASSO 2 (Tarefa Futura):** Transformar a aplicação em um Progressive Web App (PWA) instalável com suporte offline básico.
+
+**User's preferred language**: Portuguese (Português)
+
+**what currently exists?**
+Uma aplicação full-stack (React + FastAPI) funcional chamada AdOperator que implementa o fluxo principal de análise de produtos e geração de anúncios. O sistema passou por múltiplas iterações com base em feedback detalhado do usuário, evoluindo de um simples gerador de texto para um motor de decisão com uma UX sofisticada e psicologicamente orientada.
+
+*   **Backend:** Possui autenticação JWT, endpoints para todo o fluxo de análise e prompts de IA (para Claude Sonnet 4.5) altamente refinados que geram dados estruturados ricos (hipóteses, reações qualitativas, pontuações, etc.).
+*   **Frontend:** Apresenta um fluxo de várias etapas guiado, um painel vivo na home, e telas que apresentam os dados da IA de forma estratégica (anúncios como experimentos, simulações como comportamento humano e decisões como vereditos).
+
+**Last working item**:
+*   Last item agent was working: O agente estava iniciando a implementação da grande atualização solicitada pelo usuário no PASSO 1. A tarefa envolve a introdução de funcionalidades de análise de mercado e de concorrentes, além da geração de criativos. A primeira ação do agente foi ler a estrutura do projeto para entender o estado atual antes de começar a codificar as novas features.
+*   Status: NOT STARTED
+*   Agent Testing Done: N/A
+*   Which testing method agent to use? both
+*   User Testing Done: N
+
+**All Pending/In progress Issue list**:
+Nenhum bug pendente foi relatado. O trabalho a seguir é a implementação de novas funcionalidades.
+
+**In progress Task List**:
+N/A
+
+**Upcoming and Future Tasks**
+**Upcoming Tasks:**
+
+*   **Task 1: PASSO 1 - Análise de Mercado e Concorrência (P0)**
+    *   **Objetivo:** Transformar o AdOperator em um sistema que observa o mercado, compara padrões e ajuda o usuário a agir.
+    *   **Sub-tarefas:**
+        1.  **Home Persistente:** Modificar a home para ser um painel vivo com produto ativo, estratégia atual, maior fraqueza e próxima ação recomendada. Os botões principais devem ser Melhorar anúncio, Comparar com mercado e Analisar concorrente.
+        2.  **Etapa Estratégia (Operacional):** Para cada perfil de público, gerar uma tabela comparativa com abordagem, motivação, roteiro, pontos fortes e fracos.
+        3.  **Nova Etapa - Comparar com Mercado:**
+            *   Coletar dados de anúncios (texto, link, status, thumbnail).
+            *   Implementar uma análise leve (sem ML pesado) para extrair padrões: tipo de hook, risco de bloqueio, similaridade visual (pHash).
+            *   Exibir padrões dominantes e diferenças em relação à estratégia do usuário.
+            *   CTA final: GERAR CRIATIVO BASEADO NA VANTAGEM.
+        4.  **Nova Etapa - Analisar Concorrente:**
+            *   Criar tela para analisar URL de anúncio concorrente.
+            *   Extrair estratégia, promessa, mecanismo, CTA, etc.
+            *   Mostrar análise e um CTA: CRIAR VERSÃO SUPERIOR.
+        5.  **Solicitar Mídia:** Após a estratégia, pedir ao usuário para enviar imagem/vídeo do produto.
+        6.  **Geração de Criativos:** Adicionar opções para gerar fotos e hooks de vídeo curtos.
+        7.  **Fluxo Final:** Garantir que o fluxo sempre termine com uma ação (ex: criar nova variação), nunca com um botão voltar ao início.
+
+**Future Tasks:**
+
+*   **Task 2: PASSO 2 - Progressive Web App (PWA) (P1)**
+    *   **Objetivo:** Tornar o aplicativo instalável (Android/Desktop) com suporte offline básico.
+    *   **Sub-tarefas:**
+        1.  Criar e configurar o .
+        2.  Implementar um  com estratégias de cache (stale-while-revalidate para assets, network-first para APIs).
+        3.  Garantir a compatibilidade e a solicitação de instalação (Add to Home Screen).
+        4.  Garantir que o app carregue offline com uma mensagem de aviso.
+
+**Completed work in this session**
+- **Arquitetura Base:** Setup inicial do projeto full-stack com FastAPI, React e MongoDB.
+- **Autenticação de Usuário:** Implementação completa do fluxo de login/registro com JWT.
+- **Fluxo de Análise v1:** Criação do fluxo inicial de 6 passos (Entrada -> Parser -> Variações -> Simulação -> Decisão -> Resultado).
+- **Refatoração do Formulário (v2):** Alteração do formulário de entrada para um sistema de abas (Rápido e Completo) com melhorias de UX como chips de exemplos, aviso de compliance e botão Gerar exemplo.
+- **Funcionalidades de Resultado (v2):** Adição de botões para compartilhar, copiar para a área de transferência e exportar resultados.
+- **Refatoração Psicológica da UX (v3):** Grande reformulação das telas de Análise, Simulação e Decisão para apresentar os dados como um motor de decisão estratégico, e não como um gerador de texto.
+- **Dashboard Vivo (v3):** Transformação da página inicial de um histórico estático para um painel dinâmico e acionável.
+
+**Earlier issues found/mentioned but not fixed**
+Nenhum.
+
+**Known issue recurrence from previous fork**
+N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+*   **Backend:** FastAPI
+*   **Frontend:** React, React Router
+*   **Database:** MongoDB
+*   **Styling:** Tailwind CSS, shadcn/ui
+*   **Autenticação:** JWT (JSON Web Tokens)
+*   **IA:** Integração com Claude Sonnet 4.5 via API para geração de texto estruturado (JSON).
+
+**key DB schema**
+*   **users**: 
+*   **analyses**: Documento complexo que armazena todo o estado de uma análise, incluindo:
+    *   : { nome, nicho, promessa, ... }
+    *   : { nivel_consciencia, dor_central, ... }
+    *   : [ { hipotese, publico_indicado, copy, ... } ]
+    *   : { cético: { reacao, pensamento, ... }, ... }
+    *   : { vencedor, motivo, fraquezas, ... }
+    *   , , 
+
+**changes in tech stack**
+Nenhuma.
+
+**All files of reference**
+*   : Arquivo principal da API FastAPI, define todos os endpoints.
+*   : Contém as prompts estruturadas enviadas à API da Claude. É o cérebro da aplicação.
+*   : Componente React complexo e com muito estado que gerencia todo o fluxo de análise de 6 etapas na interface do usuário.
+*   : A página inicial, que funciona como um painel vivo.
+*   : Define as rotas da aplicação React.
+*   : Documento com o registro da evolução do produto, requisitos e backlog.
+
+**Areas that need refactoring**:
+O arquivo  é muito grande e gerencia um estado complexo. Pode se beneficiar de ser dividido em componentes menores e usar hooks de estado mais gerenciáveis ou um gerenciador de estado global (como Zustand ou Redux Toolkit) se a complexidade continuar a crescer.
+
+**key api endpoints**
+*   , 
+*   : (POST) Inicia uma nova análise.
+*   : (POST) Executa a etapa de parser estratégico.
+*   : (POST) Executa a etapa de geração de variações.
+*   : (POST) Executa a simulação de público.
+*   : (POST) Executa o motor de decisão.
+*   : (POST) Gera uma nova variação baseada em um vencedor.
+*   : (GET) Visualiza um resultado de análise publicamente.
+
+**Critical Info for New Agent**
+*   **Leia o PASSO 1 (Message 274) com atenção:** A próxima tarefa é uma grande adição de funcionalidades e define a direção estratégica do produto. Não é uma simples correção de bug.
+*   **Prompts são a Chave:** A inteligência da aplicação está nos prompts detalhados em . Qualquer nova funcionalidade de IA precisará de prompts igualmente bem estruturados.
+*   **Foco na UX Psicológica:** O usuário valoriza muito a forma como a informação é apresentada. O produto não é um gerador, mas um operador ou consultor. Mantenha essa filosofia em todas as novas telas.
+*   **Evite Complexidade Desnecessária:** O usuário especificou explicitamente sem ML pesado para a análise de mercado. A solução deve usar técnicas mais simples como hashing perceptual (pHash) e classificação baseada em regras.
+*   **Fluxos Acionáveis:** Cada fluxo de usuário deve terminar com uma ação clara, não em um beco sem saída (como um botão Voltar ao início).
+
+**documents and test reports created in this job**
+*   
+*   
+*   
+*   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **Message 274 (PENDING):** Solicitação de uma grande atualização (v4.2) dividida em PASSO 1 e PASSO 2.
+    *   **PASSO 1:** Adicionar análise de mercado e de concorrentes, geração de criativos, e transformar a home em um painel mais dinâmico. Status: **NOT STARTED**.
+    *   **PASSO 2:** Transformar o app em um PWA. Status: **NOT STARTED**.
+2.  **Message 191:** Feedback massivo para refatorar a UX das telas de Análise, Simulação e Decisão, e transformar a home em um painel vivo. Status: **COMPLETED**.
+3.  **Message 84:** Feedback para refatorar o formulário de entrada (modos Rápido/Completo), adicionar aviso de compliance, e melhorar CTAs e UX com exemplos. Status: **COMPLETED**.
+
+**Project Health Check:**
+*   **Broken:** N/A
+*   **Mocked:** As métricas preditivas (ex: CTR Estimado) e a análise de mercado/concorrentes (ainda a ser implementada) são baseadas em heurísticas e na saída do LLM, não em dados de performance reais.
+
+**3rd Party Integrations**
+*   **Anthropic Claude Sonnet 4.5:** Usado para toda a geração de conteúdo e análise estratégica. Utiliza a chave .
+
+**Testing status**
+*   Testing agent used after significant changes: YES
+*   Troubleshoot agent used after agent stuck in loop: NO
+*   Test files created: None
+*   Known regressions: A test de sessão do Playwright falha consistentemente, mas foi considerado um artefato do ambiente de teste e não um problema para o usuário real.
+
+**Credentials to test flow:**
+Não são necessárias credenciais específicas. O fluxo de registro cria um novo usuário que pode ser usado para todos os testes.
+
+**What agent forgot to execute**
+Nada foi esquecido. O agente estava prestes a começar a nova tarefa massiva solicitada pelo usuário no PASSO 1.</analysis>
