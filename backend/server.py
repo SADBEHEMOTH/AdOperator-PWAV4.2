@@ -1,4 +1,4 @@
-openai_client = OpenAI()  # lê OPENAI_API_KEY do ambiente automaticamente
+﻿openai_client = OpenAI()  # lÃª OPENAI_API_KEY do ambiente automaticamente
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import FileResponse
@@ -123,21 +123,21 @@ def create_token(user_id: str, email: str):
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
-        raise HTTPException(status_code=401, detail="Token não fornecido")
+        raise HTTPException(status_code=401, detail="Token nÃ£o fornecido")
     try:
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
         if not user:
-            raise HTTPException(status_code=401, detail="Usuário não encontrado")
+            raise HTTPException(status_code=401, detail="UsuÃ¡rio nÃ£o encontrado")
         return user
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expirado")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Token inválido")
+        raise HTTPException(status_code=401, detail="Token invÃ¡lido")
 
 LANGUAGE_INSTRUCTIONS = {
     "en": "\n\nIMPORTANT: Respond entirely in ENGLISH. All text values in the JSON must be in English.",
-    "es": "\n\nIMPORTANTE: Responde completamente en ESPAÑOL. Todos los valores de texto en el JSON deben ser en español.",
+    "es": "\n\nIMPORTANTE: Responde completamente en ESPAÃ‘OL. Todos los valores de texto en el JSON deben ser en espaÃ±ol.",
     "pt": "",
 }
 
@@ -179,7 +179,7 @@ async def call_claude(system_message: str, user_text: str, session_id: str, lang
 async def register(data: UserRegister):
     existing = await db.users.find_one({"email": data.email}, {"_id": 0})
     if existing:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
+        raise HTTPException(status_code=400, detail="Email jÃ¡ cadastrado")
 
     user_id = str(uuid.uuid4())
     password_hash = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
@@ -200,10 +200,10 @@ async def register(data: UserRegister):
 async def login(data: UserLogin):
     user = await db.users.find_one({"email": data.email}, {"_id": 0})
     if not user:
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
+        raise HTTPException(status_code=401, detail="Credenciais invÃ¡lidas")
 
     if not bcrypt.checkpw(data.password.encode(), user["password_hash"].encode()):
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
+        raise HTTPException(status_code=401, detail="Credenciais invÃ¡lidas")
 
     token = create_token(user["id"], user["email"])
     return {"token": token, "user": {"id": user["id"], "name": user["name"], "email": user["email"]}}
@@ -247,7 +247,7 @@ async def get_analysis(analysis_id: str, user=Depends(get_current_user)):
         {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
     return analysis
 
 # --- Compliance & Sharing Endpoints ---
@@ -318,18 +318,18 @@ async def get_public_analysis(token: str):
 # --- Web Scraping & Text Analysis Utilities ---
 
 HOOK_PATTERNS = {
-    "pergunta": ["?", "você sabe", "já pensou", "por que", "como"],
-    "historia": ["eu", "minha", "descobri", "quando", "lembro", "história"],
+    "pergunta": ["?", "vocÃª sabe", "jÃ¡ pensou", "por que", "como"],
+    "historia": ["eu", "minha", "descobri", "quando", "lembro", "histÃ³ria"],
     "lista": ["3 ", "5 ", "7 ", "10 ", "passo", "dica", "motivo"],
     "prova_social": ["milhares", "pessoas", "resultado", "depoimento", "cliente", "vendido"],
-    "mecanismo": ["funciona", "método", "sistema", "tecnologia", "fórmula", "segredo"],
+    "mecanismo": ["funciona", "mÃ©todo", "sistema", "tecnologia", "fÃ³rmula", "segredo"],
     "choque": ["pare", "cuidado", "perigo", "alerta", "nunca", "erro", "mentira"],
 }
 
 BLOCK_RISK_TERMS = [
     "cura", "curar", "100%", "garantido", "milagroso", "elimina",
     "sem efeitos colaterais", "nunca mais", "para sempre", "definitivo",
-    "comprovado cientificamente", "médicos recomendam", "aprovado pela anvisa",
+    "comprovado cientificamente", "mÃ©dicos recomendam", "aprovado pela anvisa",
 ]
 
 def classify_hook_type(text: str) -> str:
@@ -399,10 +399,10 @@ async def scrape_url(url: str) -> dict:
 
         return {
             "url": url,
-            "title": f"Anúncio em {parsed.hostname}",
-            "meta_description": " | ".join(context_hints) if context_hints else f"Conteúdo protegido de {parsed.hostname}",
+            "title": f"AnÃºncio em {parsed.hostname}",
+            "meta_description": " | ".join(context_hints) if context_hints else f"ConteÃºdo protegido de {parsed.hostname}",
             "headings": [],
-            "paragraphs": [f"URL de plataforma protegida ({parsed.hostname}). Conteúdo não pode ser raspado diretamente. Análise baseada nos metadados da URL e conhecimento do mercado."],
+            "paragraphs": [f"URL de plataforma protegida ({parsed.hostname}). ConteÃºdo nÃ£o pode ser raspado diretamente. AnÃ¡lise baseada nos metadados da URL e conhecimento do mercado."],
             "buttons_ctas": [],
             "images": [],
             "hook_type_detected": "direto",
@@ -421,7 +421,7 @@ async def scrape_url(url: str) -> dict:
             resp.raise_for_status()
     except Exception as e:
         logger.error(f"Scrape failed for {url}: {e}")
-        raise HTTPException(status_code=400, detail=f"Não foi possível acessar a URL: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"NÃ£o foi possÃ­vel acessar a URL: {str(e)}")
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -459,7 +459,7 @@ async def scrape_url(url: str) -> dict:
         "meta_description": meta_desc,
         "headings": headings[:10],
         "paragraphs": paragraphs[:20],
-        "buttons_ctas": [b for b in buttons if any(w in b.lower() for w in ["comprar", "saiba", "quero", "garanta", "agora", "teste", "grátis", "free", "clique", "acesse", "cadastr", "inscreva", "baixe"])][:8] or buttons[:5],
+        "buttons_ctas": [b for b in buttons if any(w in b.lower() for w in ["comprar", "saiba", "quero", "garanta", "agora", "teste", "grÃ¡tis", "free", "clique", "acesse", "cadastr", "inscreva", "baixe"])][:8] or buttons[:5],
         "images": images,
         "hook_type_detected": hook_type,
         "block_risk": block_risk,
@@ -475,19 +475,19 @@ async def parse_strategy(analysis_id: str, request: Request, user=Depends(get_cu
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     product = analysis["product"]
 
-    system_msg = """Você é um estrategista de marketing direto e tráfego pago com 15 anos de experiência.
-Analise o produto a seguir e retorne APENAS um JSON válido (sem markdown, sem explicação extra) com esta estrutura exata:
+    system_msg = """VocÃª Ã© um estrategista de marketing direto e trÃ¡fego pago com 15 anos de experiÃªncia.
+Analise o produto a seguir e retorne APENAS um JSON vÃ¡lido (sem markdown, sem explicaÃ§Ã£o extra) com esta estrutura exata:
 {
-  "nivel_consciencia": "string - nível de consciência do público (inconsciente, consciente do problema, consciente da solução, consciente do produto, totalmente consciente)",
-  "dor_central": "string - a dor principal que o público sente",
-  "objecoes": ["string - lista de 3-5 objeções prováveis do público"],
-  "angulo_venda": "string - o ângulo de venda mais forte para este produto",
+  "nivel_consciencia": "string - nÃ­vel de consciÃªncia do pÃºblico (inconsciente, consciente do problema, consciente da soluÃ§Ã£o, consciente do produto, totalmente consciente)",
+  "dor_central": "string - a dor principal que o pÃºblico sente",
+  "objecoes": ["string - lista de 3-5 objeÃ§Ãµes provÃ¡veis do pÃºblico"],
+  "angulo_venda": "string - o Ã¢ngulo de venda mais forte para este produto",
   "big_idea": "string - a grande ideia que diferencia este produto",
-  "mecanismo_percebido": "string - como o público percebe que o produto funciona"
+  "mecanismo_percebido": "string - como o pÃºblico percebe que o produto funciona"
 }
 Retorne SOMENTE o JSON, nada mais."""
 
@@ -495,9 +495,9 @@ Retorne SOMENTE o JSON, nada mais."""
 Nicho: {product['nicho']}
 Promessa principal: {product['promessa_principal']}"""
     if product.get('publico_alvo'):
-        user_text += f"\nPúblico-alvo: {product['publico_alvo']}"
+        user_text += f"\nPÃºblico-alvo: {product['publico_alvo']}"
     if product.get('beneficios'):
-        user_text += f"\nBenefícios: {product['beneficios']}"
+        user_text += f"\nBenefÃ­cios: {product['beneficios']}"
     if product.get('ingredientes_mecanismo'):
         user_text += f"\nIngredientes/Mecanismo: {product['ingredientes_mecanismo']}"
     if product.get('tom'):
@@ -523,67 +523,67 @@ async def generate_ads(analysis_id: str, request: Request, user=Depends(get_curr
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     product = analysis["product"]
     strategy = analysis.get("strategic_analysis")
     if not strategy:
-        raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
+        raise HTTPException(status_code=400, detail="Execute a anÃ¡lise estratÃ©gica primeiro")
 
-    system_msg = """Você é um copywriter estrategista de performance para tráfego pago.
-Crie 3 variações de anúncios ESTRUTURALMENTE DIFERENTES como um EXPERIMENTO CONTROLADO.
+    system_msg = """VocÃª Ã© um copywriter estrategista de performance para trÃ¡fego pago.
+Crie 3 variaÃ§Ãµes de anÃºncios ESTRUTURALMENTE DIFERENTES como um EXPERIMENTO CONTROLADO.
 
-REGRA CRÍTICA DE DIVERSIDADE:
-- Variação 1: HISTÓRIA PESSOAL — narrativa de descoberta, conexão emocional
-- Variação 2: DESCOBERTA INESPERADA — dado surpreendente, quebra de padrão
-- Variação 3: ATAQUE AO ERRO COMUM — provocação direta, confronto de crença
+REGRA CRÃTICA DE DIVERSIDADE:
+- VariaÃ§Ã£o 1: HISTÃ“RIA PESSOAL â€” narrativa de descoberta, conexÃ£o emocional
+- VariaÃ§Ã£o 2: DESCOBERTA INESPERADA â€” dado surpreendente, quebra de padrÃ£o
+- VariaÃ§Ã£o 3: ATAQUE AO ERRO COMUM â€” provocaÃ§Ã£o direta, confronto de crenÃ§a
 
-Se os 3 anúncios parecerem variações do mesmo texto com palavras diferentes, o experimento falha.
+Se os 3 anÃºncios parecerem variaÃ§Ãµes do mesmo texto com palavras diferentes, o experimento falha.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
-  "nota_experimental": "Não avaliamos anúncios por estética, e sim por reação provável do público.",
+  "nota_experimental": "NÃ£o avaliamos anÃºncios por estÃ©tica, e sim por reaÃ§Ã£o provÃ¡vel do pÃºblico.",
   "anuncios": [
     {
       "numero": 1,
-      "hipotese": "string curta (ex: Curiosidade, Identificação, Autoridade)",
-      "objetivo": "string - o que tenta provocar no público (ex: gerar clique sem julgamento inicial)",
-      "estrategia": "string - mecanismo psicológico (ex: abrir loop cognitivo)",
-      "publico_indicado": "string - tipo de público ideal (ex: Público frio - Baixa consciência do problema)",
+      "hipotese": "string curta (ex: Curiosidade, IdentificaÃ§Ã£o, Autoridade)",
+      "objetivo": "string - o que tenta provocar no pÃºblico (ex: gerar clique sem julgamento inicial)",
+      "estrategia": "string - mecanismo psicolÃ³gico (ex: abrir loop cognitivo)",
+      "publico_indicado": "string - tipo de pÃºblico ideal (ex: PÃºblico frio - Baixa consciÃªncia do problema)",
       "hook": "string - gancho de abertura impactante",
       "copy": "string - copy curta e persuasiva (3-5 frases)",
-      "roteiro_ugc": "string - roteiro para vídeo UGC (5-8 passos)",
-      "abordagem_estrutural": "string - História pessoal / Descoberta inesperada / Ataque ao erro comum",
+      "roteiro_ugc": "string - roteiro para vÃ­deo UGC (5-8 passos)",
+      "abordagem_estrutural": "string - HistÃ³ria pessoal / Descoberta inesperada / Ataque ao erro comum",
       "pontos_fortes": ["2-3 pontos fortes concretos"],
       "pontos_fracos": ["1-2 pontos fracos honestos"],
       "metricas_preditivas": {
         "ctr_estimado": "string range (ex: 2.8-3.5%)",
-        "nivel_curiosidade": "Baixo/Médio/Alto",
-        "risco_bloqueio": "Baixo/Médio/Alto",
-        "probabilidade_conversao": "Baixa/Média/Alta"
+        "nivel_curiosidade": "Baixo/MÃ©dio/Alto",
+        "risco_bloqueio": "Baixo/MÃ©dio/Alto",
+        "probabilidade_conversao": "Baixa/MÃ©dia/Alta"
       }
     }
   ]
 }
-Retorne SOMENTE o JSON."""
+Retorne SOMENTE o JSON."
 
     user_text = f"""PRODUTO:
 Nome: {product['nome']}
 Nicho: {product['nicho']}
 Promessa: {product['promessa_principal']}"""
     if product.get('publico_alvo'):
-        user_text += f"\nPúblico: {product['publico_alvo']}"
+        user_text += f"\nPÃºblico: {product['publico_alvo']}"
     if product.get('beneficios'):
-        user_text += f"\nBenefícios: {product['beneficios']}"
+        user_text += f"\nBenefÃ­cios: {product['beneficios']}"
     if product.get('ingredientes_mecanismo'):
         user_text += f"\nMecanismo: {product['ingredientes_mecanismo']}"
     user_text += f"""
 
-ANÁLISE ESTRATÉGICA:
-Nível de consciência: {strategy.get('nivel_consciencia', '')}
+ANÃLISE ESTRATÃ‰GICA:
+NÃ­vel de consciÃªncia: {strategy.get('nivel_consciencia', '')}
 Dor central: {strategy.get('dor_central', '')}
-Objeções: {json.dumps(strategy.get('objecoes', []), ensure_ascii=False)}
-Ângulo de venda: {strategy.get('angulo_venda', '')}
+ObjeÃ§Ãµes: {json.dumps(strategy.get('objecoes', []), ensure_ascii=False)}
+Ã‚ngulo de venda: {strategy.get('angulo_venda', '')}
 Big idea: {strategy.get('big_idea', '')}
 Mecanismo percebido: {strategy.get('mecanismo_percebido', '')}"""
 
@@ -602,38 +602,38 @@ async def simulate_audience(analysis_id: str, request: Request, user=Depends(get
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     ads = analysis.get("ad_variations")
     if not ads:
-        raise HTTPException(status_code=400, detail="Gere os anúncios primeiro")
+        raise HTTPException(status_code=400, detail="Gere os anÃºncios primeiro")
 
-    system_msg = """Você simula COMPORTAMENTO HUMANO real de 4 perfis reagindo a anúncios.
+    system_msg = """VocÃª simula COMPORTAMENTO HUMANO real de 4 perfis reagindo a anÃºncios.
 
 Perfis:
-1. Cético — questiona tudo, teve experiências ruins com promessas online
-2. Interessado — busca soluções ativamente, aberto mas cauteloso
-3. Impulsivo — age por emoção, decide em segundos
-4. Desconfiado — já foi enganado, filtra tudo com ceticismo alto
+1. CÃ©tico â€” questiona tudo, teve experiÃªncias ruins com promessas online
+2. Interessado â€” busca soluÃ§Ãµes ativamente, aberto mas cauteloso
+3. Impulsivo â€” age por emoÃ§Ã£o, decide em segundos
+4. Desconfiado â€” jÃ¡ foi enganado, filtra tudo com ceticismo alto
 
-REGRA CRÍTICA: Simule COMPORTAMENTO, não análise.
+REGRA CRÃTICA: Simule COMPORTAMENTO, nÃ£o anÃ¡lise.
 - Humanos reagem emocionalmente PRIMEIRO, depois justificam
-- A decisão já foi tomada antes da "análise"
+- A decisÃ£o jÃ¡ foi tomada antes da "anÃ¡lise"
 - DEVE haver CONFLITO entre perfis (nem todos concordam)
-- Impulsivo e Cético devem DIVERGIR frequentemente
-- Interessado deve HESITAR, não decidir rápido
-- Métricas são CONSEQUÊNCIA da reação, não o centro
+- Impulsivo e CÃ©tico devem DIVERGIR frequentemente
+- Interessado deve HESITAR, nÃ£o decidir rÃ¡pido
+- MÃ©tricas sÃ£o CONSEQUÃŠNCIA da reaÃ§Ã£o, nÃ£o o centro
 
-Para CADA anúncio, CADA perfil deve ter 4 CAMADAS de reação.
-Retorne APENAS JSON válido (sem markdown):
+Para CADA anÃºncio, CADA perfil deve ter 4 CAMADAS de reaÃ§Ã£o.
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "simulacao": [
     {
       "anuncio_numero": 1,
       "reacoes": [
         {
-          "perfil": "Cético",
-          "reacao_emocional": "string - primeira reação instintiva, curta, humana (ex: 'parece propaganda comum, eu ignoraria')",
+          "perfil": "CÃ©tico",
+          "reacao_emocional": "string - primeira reaÃ§Ã£o instintiva, curta, humana (ex: 'parece propaganda comum, eu ignoraria')",
           "pensamento_2s": "string - o que pensa 2 segundos depois (ex: 'mas espera... nunca vi isso abordado assim')",
           "decisao_provavel": "string - ignorar / clicar / salvar / investigar",
           "o_que_faria_clicar": "string - o que faria ESTE perfil clicar (ex: 'precisaria ver prova visual')",
@@ -645,13 +645,13 @@ Retorne APENAS JSON válido (sem markdown):
       ]
     }
   ],
-  "tendencia_geral": "string - padrão detectado (ex: 'anúncios baseados em curiosidade superam promessa direta neste nicho')",
-  "conflitos_detectados": "string - onde perfis divergem (ex: 'impulsivo e cético divergem fortemente na variação A — sinal de copy polarizante')"
+  "tendencia_geral": "string - padrÃ£o detectado (ex: 'anÃºncios baseados em curiosidade superam promessa direta neste nicho')",
+  "conflitos_detectados": "string - onde perfis divergem (ex: 'impulsivo e cÃ©tico divergem fortemente na variaÃ§Ã£o A â€” sinal de copy polarizante')"
 }
 Retorne SOMENTE o JSON."""
 
     ads_text = json.dumps(ads, ensure_ascii=False)
-    user_text = f"Analise os seguintes anúncios e simule as reações dos 4 perfis para cada um:\n\n{ads_text}"
+    user_text = f"Analise os seguintes anÃºncios e simule as reaÃ§Ãµes dos 4 perfis para cada um:\n\n{ads_text}"
 
     lang = request.headers.get("x-language", "pt")
     result = await call_claude(system_msg, user_text, f"simulate-{analysis_id}", lang)
@@ -668,30 +668,30 @@ async def decide_winner(analysis_id: str, request: Request, user=Depends(get_cur
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     simulation = analysis.get("audience_simulation")
     ads = analysis.get("ad_variations")
     if not simulation or not ads:
-        raise HTTPException(status_code=400, detail="Execute a simulação primeiro")
+        raise HTTPException(status_code=400, detail="Execute a simulaÃ§Ã£o primeiro")
 
-    system_msg = """Você é um motor de decisão que ASSUME RESPONSABILIDADE pela escolha.
-Você NÃO apresenta comparativo. Você DECIDE e EXPLICA com causalidade humana.
+    system_msg = """VocÃª Ã© um motor de decisÃ£o que ASSUME RESPONSABILIDADE pela escolha.
+VocÃª NÃƒO apresenta comparativo. VocÃª DECIDE e EXPLICA com causalidade humana.
 
 REGRA: Veredito PRIMEIRO. Dados DEPOIS.
-O usuário nunca deve precisar interpretar números para saber qual venceu.
+O usuÃ¡rio nunca deve precisar interpretar nÃºmeros para saber qual venceu.
 
 Use CAUSALIDADE HUMANA:
-ERRADO: "apresentou melhor equilíbrio entre métricas"
-CERTO: "vence porque cria curiosidade antes da avaliação lógica — reduz rejeição inicial"
+ERRADO: "apresentou melhor equilÃ­brio entre mÃ©tricas"
+CERTO: "vence porque cria curiosidade antes da avaliaÃ§Ã£o lÃ³gica â€” reduz rejeiÃ§Ã£o inicial"
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "veredito": {
     "anuncio_numero": 1,
     "pontuacao_final": 85.5,
-    "frase_principal": "string - frase de impacto (ex: Maior chance de gerar clique inicial em público frio)",
-    "explicacao_causal": "string - explicação com causalidade humana, NÃO relatório técnico",
+    "frase_principal": "string - frase de impacto (ex: Maior chance de gerar clique inicial em pÃºblico frio)",
+    "explicacao_causal": "string - explicaÃ§Ã£o com causalidade humana, NÃƒO relatÃ³rio tÃ©cnico",
     "hook": "hook completo do vencedor",
     "copy": "copy completa do vencedor",
     "roteiro_ugc": "roteiro UGC completo do vencedor"
@@ -702,30 +702,30 @@ Retorne APENAS JSON válido (sem markdown):
       "consequencia": "string - o que acontece se usar este (ex: tende a aumentar o custo por clique)"
     }
   ],
-  "investimento_recomendacao": "string - Se estivesse investindo R$2.000 hoje, usaria qual e por quê (responder com convicção)",
+  "investimento_recomendacao": "string - Se estivesse investindo R$2.000 hoje, usaria qual e por quÃª (responder com convicÃ§Ã£o)",
   "proximo_passo": {
-    "acao": "string - próxima ação recomendada (ex: criar página baseada neste anúncio)",
-    "motivo": "string - por que fazer isso (ex: manter consistência narrativa aumenta conversão)"
+    "acao": "string - prÃ³xima aÃ§Ã£o recomendada (ex: criar pÃ¡gina baseada neste anÃºncio)",
+    "motivo": "string - por que fazer isso (ex: manter consistÃªncia narrativa aumenta conversÃ£o)"
   },
-  "melhorias_possiveis": ["string - 3 ações de melhoria concretas (ex: adaptar para público quente, reduzir promessa direta, testar prova visual)"],
+  "melhorias_possiveis": ["string - 3 aÃ§Ãµes de melhoria concretas (ex: adaptar para pÃºblico quente, reduzir promessa direta, testar prova visual)"],
   "fraquezas": ["string - 2-3 fraquezas honestas do vencedor"],
-  "sugestao_melhoria": "string - melhoria específica prioritária",
+  "sugestao_melhoria": "string - melhoria especÃ­fica prioritÃ¡ria",
   "estrutura_lp": {
     "headline": "string",
     "subheadline": "string",
-    "secoes": ["string - 4-6 seções"]
+    "secoes": ["string - 4-6 seÃ§Ãµes"]
   },
-  "publico_compativel": "string - público ideal detalhado",
+  "publico_compativel": "string - pÃºblico ideal detalhado",
   "ranking": [
     {"anuncio_numero": 1, "pontuacao": 85.5}
   ]
 }
 Retorne SOMENTE o JSON."""
 
-    user_text = f"""ANÚNCIOS:
+    user_text = f"""ANÃšNCIOS:
 {json.dumps(ads, ensure_ascii=False)}
 
-SIMULAÇÃO DE PÚBLICO:
+SIMULAÃ‡ÃƒO DE PÃšBLICO:
 {json.dumps(simulation, ensure_ascii=False)}"""
 
     lang = request.headers.get("x-language", "pt")
@@ -772,7 +772,7 @@ async def market_compare(analysis_id: str, request: Request, user=Depends(get_cu
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     product = analysis["product"]
     strategy = analysis.get("strategic_analysis")
@@ -780,7 +780,7 @@ async def market_compare(analysis_id: str, request: Request, user=Depends(get_cu
     ads = analysis.get("ad_variations")
 
     if not strategy:
-        raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
+        raise HTTPException(status_code=400, detail="Execute a anÃ¡lise estratÃ©gica primeiro")
 
     user_hook = ""
     user_copy = ""
@@ -792,47 +792,47 @@ async def market_compare(analysis_id: str, request: Request, user=Depends(get_cu
         user_hook = ads["anuncios"][0].get("hook", "")
         user_copy = ads["anuncios"][0].get("copy", "")
 
-    system_msg = """Você é um analista de inteligência de mercado especializado em tráfego pago e anúncios digitais.
-Sua tarefa é analisar o mercado do nicho do produto e gerar uma comparação realista com a estratégia do usuário.
+    system_msg = """VocÃª Ã© um analista de inteligÃªncia de mercado especializado em trÃ¡fego pago e anÃºncios digitais.
+Sua tarefa Ã© analisar o mercado do nicho do produto e gerar uma comparaÃ§Ã£o realista com a estratÃ©gia do usuÃ¡rio.
 
-Baseie-se no seu conhecimento sobre padrões reais de anúncios no mercado brasileiro de tráfego pago.
+Baseie-se no seu conhecimento sobre padrÃµes reais de anÃºncios no mercado brasileiro de trÃ¡fego pago.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "anuncios_mercado": [
     {
-      "titulo": "string - nome descritivo do padrão de anúncio",
-      "texto_exemplo": "string - texto exemplo realista de anúncio do mercado",
+      "titulo": "string - nome descritivo do padrÃ£o de anÃºncio",
+      "texto_exemplo": "string - texto exemplo realista de anÃºncio do mercado",
       "tipo_hook": "pergunta | historia | lista | prova_social | mecanismo | choque",
       "status": "ativo",
       "persistencia_estimada": "string - ex: 30+ dias (indica que funciona)",
       "risco_bloqueio": "baixo | medio | alto",
-      "promessa": "string - promessa central do anúncio",
+      "promessa": "string - promessa central do anÃºncio",
       "cta": "string - call to action usado",
-      "psicologia": "string - mecanismo psicológico principal"
+      "psicologia": "string - mecanismo psicolÃ³gico principal"
     }
   ],
   "padroes_dominantes": [
     {
-      "padrao": "string - nome do padrão",
-      "frequencia": "string - ex: presente em 60% dos anúncios",
-      "descricao": "string - como esse padrão funciona",
+      "padrao": "string - nome do padrÃ£o",
+      "frequencia": "string - ex: presente em 60% dos anÃºncios",
+      "descricao": "string - como esse padrÃ£o funciona",
       "exemplo": "string - exemplo concreto"
     }
   ],
   "anuncios_persistentes": [
     {
-      "descricao": "string - tipo de anúncio que permanece ativo por mais tempo",
+      "descricao": "string - tipo de anÃºncio que permanece ativo por mais tempo",
       "duracao_estimada": "string - ex: 45+ dias",
       "motivo_persistencia": "string - por que continua rodando"
     }
   ],
   "comparativo_usuario": {
     "como_mercado_vende": "string - resumo de como o mercado vende neste nicho",
-    "onde_usuario_difere": "string - principais diferenças da estratégia do usuário",
-    "vantagem_competitiva": "string - onde o usuário tem vantagem sobre o mercado",
-    "risco_generico": "string - onde o usuário pode parecer genérico",
-    "recomendacao_pratica": "string - ação prática baseada na análise"
+    "onde_usuario_difere": "string - principais diferenÃ§as da estratÃ©gia do usuÃ¡rio",
+    "vantagem_competitiva": "string - onde o usuÃ¡rio tem vantagem sobre o mercado",
+    "risco_generico": "string - onde o usuÃ¡rio pode parecer genÃ©rico",
+    "recomendacao_pratica": "string - aÃ§Ã£o prÃ¡tica baseada na anÃ¡lise"
   },
   "hooks_por_tipo": {
     "pergunta": "number - porcentagem estimada",
@@ -845,23 +845,23 @@ Retorne APENAS JSON válido (sem markdown):
 }
 Retorne SOMENTE o JSON."""
 
-    user_text = f"""PRODUTO DO USUÁRIO:
+    user_text = f"""PRODUTO DO USUÃRIO:
 Nome: {product['nome']}
 Nicho: {product['nicho']}
 Promessa: {product['promessa_principal']}
-Público-alvo: {product.get('publico_alvo', 'Não especificado')}
+PÃºblico-alvo: {product.get('publico_alvo', 'NÃ£o especificado')}
 
-ESTRATÉGIA ATUAL DO USUÁRIO:
-Nível de consciência: {strategy.get('nivel_consciencia', '')}
+ESTRATÃ‰GIA ATUAL DO USUÃRIO:
+NÃ­vel de consciÃªncia: {strategy.get('nivel_consciencia', '')}
 Dor central: {strategy.get('dor_central', '')}
-Ângulo de venda: {strategy.get('angulo_venda', '')}
+Ã‚ngulo de venda: {strategy.get('angulo_venda', '')}
 Big idea: {strategy.get('big_idea', '')}
 
-ANÚNCIO ATUAL DO USUÁRIO:
+ANÃšNCIO ATUAL DO USUÃRIO:
 Hook: {user_hook}
 Copy: {user_copy}
 
-Analise o mercado deste nicho e compare com a estratégia do usuário. Gere 5-7 exemplos de anúncios típicos do mercado."""
+Analise o mercado deste nicho e compare com a estratÃ©gia do usuÃ¡rio. Gere 5-7 exemplos de anÃºncios tÃ­picos do mercado."""
 
     lang = request.headers.get("x-language", "pt")
     result = await call_claude(system_msg, user_text, f"market-{analysis_id}", lang)
@@ -882,20 +882,20 @@ async def analyze_competitor(data: CompetitorURLInput, request: Request, user=De
     is_protected = scraped.get("is_protected", False)
 
     if is_img:
-        system_msg = """Você é um analista estratégico de anúncios digitais.
-O usuário forneceu uma URL direta para uma imagem de anúncio de um concorrente. Com base no URL e no contexto do mercado, gere uma análise estratégica baseada no que esse tipo de criativo visual provavelmente comunica.
+        system_msg = """VocÃª Ã© um analista estratÃ©gico de anÃºncios digitais.
+O usuÃ¡rio forneceu uma URL direta para uma imagem de anÃºncio de um concorrente. Com base no URL e no contexto do mercado, gere uma anÃ¡lise estratÃ©gica baseada no que esse tipo de criativo visual provavelmente comunica.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "analise": {
-    "tipo_abertura": "string - tipo provável de abertura visual",
-    "promessa": "string - promessa provável baseada no formato visual",
-    "mecanismo": "string - mecanismo provável",
-    "prova": "string - tipo de prova provável",
-    "cta": "string - CTA provável",
-    "psicologia_utilizada": "string - técnicas visuais prováveis",
+    "tipo_abertura": "string - tipo provÃ¡vel de abertura visual",
+    "promessa": "string - promessa provÃ¡vel baseada no formato visual",
+    "mecanismo": "string - mecanismo provÃ¡vel",
+    "prova": "string - tipo de prova provÃ¡vel",
+    "cta": "string - CTA provÃ¡vel",
+    "psicologia_utilizada": "string - tÃ©cnicas visuais provÃ¡veis",
     "risco_bloqueio": "baixo | medio | alto",
-    "formato_visual": "imagem estática"
+    "formato_visual": "imagem estÃ¡tica"
   },
   "interpretacao": {
     "o_que_tenta_fazer": "string",
@@ -904,8 +904,8 @@ Retorne APENAS JSON válido (sem markdown):
     "como_superar": "string"
   },
   "dados_coletados": {
-    "titulo_pagina": "Imagem de anúncio",
-    "hook_principal": "string - gancho visual provável",
+    "titulo_pagina": "Imagem de anÃºncio",
+    "hook_principal": "string - gancho visual provÃ¡vel",
     "tipo_hook": "direto",
     "ctas_encontrados": [],
     "elementos_persuasao": ["string"],
@@ -913,14 +913,14 @@ Retorne APENAS JSON válido (sem markdown):
   }
 }
 Retorne SOMENTE o JSON."""
-        content_text = f"URL da imagem de anúncio do concorrente: {data.url}\nAnalise o que esse tipo de criativo visual provavelmente comunica no mercado de anúncios digitais."
+        content_text = f"URL da imagem de anÃºncio do concorrente: {data.url}\nAnalise o que esse tipo de criativo visual provavelmente comunica no mercado de anÃºncios digitais."
 
     elif is_protected:
-        system_msg = """Você é um analista estratégico de anúncios digitais.
-O usuário forneceu uma URL de uma plataforma protegida (como Facebook Ads Library, Instagram, etc.) que não pode ser raspada diretamente.
-Com base na URL, nos metadados disponíveis e no seu conhecimento sobre padrões de anúncios nessas plataformas, gere a melhor análise estratégica possível.
+        system_msg = """VocÃª Ã© um analista estratÃ©gico de anÃºncios digitais.
+O usuÃ¡rio forneceu uma URL de uma plataforma protegida (como Facebook Ads Library, Instagram, etc.) que nÃ£o pode ser raspada diretamente.
+Com base na URL, nos metadados disponÃ­veis e no seu conhecimento sobre padrÃµes de anÃºncios nessas plataformas, gere a melhor anÃ¡lise estratÃ©gica possÃ­vel.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "analise": {
     "tipo_abertura": "string",
@@ -951,58 +951,58 @@ Retorne SOMENTE o JSON."""
         content_text = f"""URL protegida: {scraped['url']}
 Plataforma: {scraped['title']}
 Contexto: {scraped['meta_description']}
-Informações disponíveis: {scraped['full_text_preview']}
+InformaÃ§Ãµes disponÃ­veis: {scraped['full_text_preview']}
 
-Faça a melhor análise possível com base nos metadados da URL e seu conhecimento sobre anúncios nessa plataforma."""
+FaÃ§a a melhor anÃ¡lise possÃ­vel com base nos metadados da URL e seu conhecimento sobre anÃºncios nessa plataforma."""
 
     else:
-        system_msg = """Você é um analista estratégico de anúncios digitais.
-Analise o conteúdo desta página/anúncio de um concorrente e extraia uma análise estratégica completa.
+        system_msg = """VocÃª Ã© um analista estratÃ©gico de anÃºncios digitais.
+Analise o conteÃºdo desta pÃ¡gina/anÃºncio de um concorrente e extraia uma anÃ¡lise estratÃ©gica completa.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "analise": {
-    "tipo_abertura": "string - como o anúncio/página abre (pergunta, história, choque, dados, etc.)",
+    "tipo_abertura": "string - como o anÃºncio/pÃ¡gina abre (pergunta, histÃ³ria, choque, dados, etc.)",
     "promessa": "string - promessa central feita ao visitante",
-    "mecanismo": "string - como o produto/serviço afirma funcionar",
-    "prova": "string - que tipo de prova social ou evidência é usada",
+    "mecanismo": "string - como o produto/serviÃ§o afirma funcionar",
+    "prova": "string - que tipo de prova social ou evidÃªncia Ã© usada",
     "cta": "string - call to action principal",
-    "psicologia_utilizada": "string - técnicas psicológicas identificadas (escassez, autoridade, etc.)",
+    "psicologia_utilizada": "string - tÃ©cnicas psicolÃ³gicas identificadas (escassez, autoridade, etc.)",
     "risco_bloqueio": "baixo | medio | alto",
-    "formato_visual": "string - descrição do formato visual (vídeo, imagem, texto longo, etc.)"
+    "formato_visual": "string - descriÃ§Ã£o do formato visual (vÃ­deo, imagem, texto longo, etc.)"
   },
   "interpretacao": {
-    "o_que_tenta_fazer": "string - objetivo real do anúncio/página",
+    "o_que_tenta_fazer": "string - objetivo real do anÃºncio/pÃ¡gina",
     "por_que_pode_funcionar": "string - pontos fortes da abordagem",
     "onde_perde_forca": "string - fraquezas identificadas",
-    "como_superar": "string - estratégia para criar algo superior"
+    "como_superar": "string - estratÃ©gia para criar algo superior"
   },
   "dados_coletados": {
     "titulo_pagina": "string",
     "hook_principal": "string - gancho principal identificado",
     "tipo_hook": "pergunta | historia | lista | prova_social | mecanismo | choque",
     "ctas_encontrados": ["strings"],
-    "elementos_persuasao": ["strings - elementos de persuasão encontrados"],
-    "palavras_chave": ["strings - 5-10 palavras-chave do conteúdo"]
+    "elementos_persuasao": ["strings - elementos de persuasÃ£o encontrados"],
+    "palavras_chave": ["strings - 5-10 palavras-chave do conteÃºdo"]
   }
 }
 Retorne SOMENTE o JSON."""
 
         content_text = f"""URL: {scraped['url']}
-Título: {scraped['title']}
+TÃ­tulo: {scraped['title']}
 Meta Description: {scraped['meta_description']}
 
 HEADINGS:
 {chr(10).join(scraped['headings'][:8])}
 
-CONTEÚDO PRINCIPAL:
+CONTEÃšDO PRINCIPAL:
 {chr(10).join(scraped['paragraphs'][:15])}
 
-CTAs/BOTÕES ENCONTRADOS:
+CTAs/BOTÃ•ES ENCONTRADOS:
 {', '.join(scraped['buttons_ctas'][:10])}
 
-TIPO DE HOOK DETECTADO (automático): {scraped['hook_type_detected']}
-RISCO DE BLOQUEIO (automático): {scraped['block_risk']['level']} - termos: {', '.join(scraped['block_risk']['terms'][:5])}"""
+TIPO DE HOOK DETECTADO (automÃ¡tico): {scraped['hook_type_detected']}
+RISCO DE BLOQUEIO (automÃ¡tico): {scraped['block_risk']['level']} - termos: {', '.join(scraped['block_risk']['terms'][:5])}"""
 
     lang = request.headers.get("x-language", "pt")
     result = await call_claude(system_msg, content_text, f"competitor-{uuid.uuid4()}", lang)
@@ -1035,7 +1035,7 @@ async def list_competitor_analyses(user=Depends(get_current_user)):
     ).sort("created_at", -1).to_list(50)
     return items
 
-# --- Radar de Tendências Endpoint ---
+# --- Radar de TendÃªncias Endpoint ---
 
 @api_router.post("/radar/generate")
 async def generate_radar(request: Request, user=Depends(get_current_user)):
@@ -1044,7 +1044,7 @@ async def generate_radar(request: Request, user=Depends(get_current_user)):
     ).sort("created_at", -1).to_list(20)
 
     if not analyses:
-        raise HTTPException(status_code=400, detail="Você precisa de pelo menos uma análise concluída para gerar o radar")
+        raise HTTPException(status_code=400, detail="VocÃª precisa de pelo menos uma anÃ¡lise concluÃ­da para gerar o radar")
 
     niches = list(set(a["product"]["nicho"] for a in analyses if a.get("product", {}).get("nicho")))
     products = [a["product"]["nome"] for a in analyses[:5]]
@@ -1070,53 +1070,53 @@ async def generate_radar(request: Request, user=Depends(get_current_user)):
 
     lang = request.headers.get("x-language", "pt")
 
-    system_msg = """Você é um consultor estratégico de tráfego pago que gera briefings semanais de tendências.
-Analise os dados acumulados do usuário (análises, estratégias, nichos) e gere um radar de tendências.
+    system_msg = """VocÃª Ã© um consultor estratÃ©gico de trÃ¡fego pago que gera briefings semanais de tendÃªncias.
+Analise os dados acumulados do usuÃ¡rio (anÃ¡lises, estratÃ©gias, nichos) e gere um radar de tendÃªncias.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
-  "resumo": "string - resumo executivo em 2-3 frases do estado atual do mercado do usuário",
+  "resumo": "string - resumo executivo em 2-3 frases do estado atual do mercado do usuÃ¡rio",
   "mudancas_mercado": [
     {
-      "mudanca": "string - o que mudou ou está mudando",
+      "mudanca": "string - o que mudou ou estÃ¡ mudando",
       "impacto": "positivo | negativo | neutro",
       "recomendacao": "string - o que fazer a respeito"
     }
   ],
   "padroes_emergentes": [
     {
-      "padrao": "string - padrão identificado",
+      "padrao": "string - padrÃ£o identificado",
       "relevancia": "alta | media | baixa",
       "descricao": "string - por que isso importa"
     }
   ],
   "recomendacoes": [
     {
-      "acao": "string - ação recomendada",
+      "acao": "string - aÃ§Ã£o recomendada",
       "prioridade": "urgente | importante | opcional",
       "motivo": "string - por que fazer isso agora"
     }
   ],
   "pontuacao_saude": {
     "score": 75,
-    "label": "string - ex: Bom / Excelente / Precisa de atenção",
-    "detalhe": "string - explicação breve"
+    "label": "string - ex: Bom / Excelente / Precisa de atenÃ§Ã£o",
+    "detalhe": "string - explicaÃ§Ã£o breve"
   }
 }
 Retorne SOMENTE o JSON."""
 
-    user_text = f"""DADOS ACUMULADOS DO USUÁRIO:
+    user_text = f"""DADOS ACUMULADOS DO USUÃRIO:
 
 Nichos: {', '.join(niches)}
 Produtos analisados: {', '.join(products)}
 
-ESTRATÉGIAS USADAS:
+ESTRATÃ‰GIAS USADAS:
 {json.dumps(strategies, ensure_ascii=False)}
 
 DADOS DE MERCADO COLETADOS:
 {json.dumps(market_data, ensure_ascii=False) if market_data else 'Nenhum dado de mercado coletado ainda.'}
 
-Gere um briefing semanal com tendências, mudanças e recomendações práticas."""
+Gere um briefing semanal com tendÃªncias, mudanÃ§as e recomendaÃ§Ãµes prÃ¡ticas."""
 
     result = await call_claude(system_msg, user_text, f"radar-{user['id']}", lang)
 
@@ -1150,20 +1150,20 @@ async def generate_strategy_table(analysis_id: str, request: Request, user=Depen
         {"id": analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
     if not analysis.get("strategic_analysis"):
-        raise HTTPException(status_code=400, detail="Execute a análise estratégica primeiro")
+        raise HTTPException(status_code=400, detail="Execute a anÃ¡lise estratÃ©gica primeiro")
 
     product = analysis["product"]
     strategy = analysis["strategic_analysis"]
 
-    system_msg = """Você é um estrategista de anúncios digitais. Gere uma tabela comparativa detalhada para cada perfil de público.
+    system_msg = """VocÃª Ã© um estrategista de anÃºncios digitais. Gere uma tabela comparativa detalhada para cada perfil de pÃºblico.
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
   "perfis": [
     {
-      "nome": "Cético",
+      "nome": "CÃ©tico",
       "emoji": "string",
       "abordagem": "string - como abordar esse perfil",
       "motivacao": "string - o que motiva esse perfil a comprar",
@@ -1171,22 +1171,22 @@ Retorne APENAS JSON válido (sem markdown):
       "pontos_fortes": ["string - 2-3 pontos fortes da abordagem"],
       "pontos_fracos": ["string - 2-3 pontos fracos / riscos"],
       "hook_recomendado": "string - tipo de hook ideal para esse perfil",
-      "tom_ideal": "string - tom de comunicação recomendado"
+      "tom_ideal": "string - tom de comunicaÃ§Ã£o recomendado"
     }
   ],
-  "recomendacao_geral": "string - qual perfil priorizar e por quê"
+  "recomendacao_geral": "string - qual perfil priorizar e por quÃª"
 }
-Gere 4 perfis: Cético, Interessado, Impulsivo, Desconfiado.
+Gere 4 perfis: CÃ©tico, Interessado, Impulsivo, Desconfiado.
 Retorne SOMENTE o JSON."""
 
     user_text = f"""PRODUTO: {product['nome']}
 NICHO: {product['nicho']}
 PROMESSA: {product['promessa_principal']}
-PÚBLICO: {product.get('publico_alvo', '')}
-ESTRATÉGIA:
-- Nível de consciência: {strategy.get('nivel_consciencia', '')}
+PÃšBLICO: {product.get('publico_alvo', '')}
+ESTRATÃ‰GIA:
+- NÃ­vel de consciÃªncia: {strategy.get('nivel_consciencia', '')}
 - Dor central: {strategy.get('dor_central', '')}
-- Ângulo de venda: {strategy.get('angulo_venda', '')}
+- Ã‚ngulo de venda: {strategy.get('angulo_venda', '')}
 - Big Idea: {strategy.get('big_idea', '')}
 - Mecanismo: {strategy.get('mecanismo_percebido', '')}"""
 
@@ -1208,7 +1208,7 @@ async def upload_media(file: UploadFile = File(...), user=Depends(get_current_us
     is_video = content_type.startswith("video/")
 
     if not is_image and not is_video:
-        raise HTTPException(status_code=400, detail="Apenas imagens e vídeos são aceitos")
+        raise HTTPException(status_code=400, detail="Apenas imagens e vÃ­deos sÃ£o aceitos")
 
     max_size = MAX_IMAGE_SIZE if is_image else MAX_VIDEO_SIZE
     contents = await file.read()
@@ -1243,10 +1243,10 @@ async def upload_media(file: UploadFile = File(...), user=Depends(get_current_us
 async def get_media(file_id: str):
     media = await db.media.find_one({"id": file_id}, {"_id": 0})
     if not media:
-        raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+        raise HTTPException(status_code=404, detail="Arquivo nÃ£o encontrado")
     filepath = UPLOAD_DIR / media["filename"]
     if not filepath.exists():
-        raise HTTPException(status_code=404, detail="Arquivo não encontrado no disco")
+        raise HTTPException(status_code=404, detail="Arquivo nÃ£o encontrado no disco")
     return FileResponse(filepath, media_type=media["content_type"])
 
 @api_router.get("/media/user/list")
@@ -1257,11 +1257,11 @@ async def list_user_media(user=Depends(get_current_user)):
     return items
 
 HOOK_TEMPLATES = {
-    "vsl": "Estilo VSL (Video Sales Letter): Abra com um gancho forte e provocativo nos primeiros 3 segundos. Mostre o problema de forma visceral. Apresente a solução como descoberta única. Use urgência e escassez. Termine com CTA claro.",
-    "ugc": "Estilo UGC (User Generated Content): Câmera frontal, como se fosse um depoimento espontâneo. Iluminação natural, tom conversacional. A pessoa fala diretamente com a câmera sobre sua experiência. Cenário caseiro e autêntico.",
-    "before_after": "Estilo Before/After: Divida o vídeo em dois momentos claros - o antes (problema, frustração) e o depois (transformação, resultado). Transição dramática no meio. Mostre contraste visual forte.",
-    "depoimento": "Estilo Depoimento: Uma pessoa conta sua história real de transformação com o produto. Tom emocional, vulnerável no início, confiante no final. Close no rosto, sem cenário distrativo.",
-    "problema_solucao": "Estilo Problema-Solução: Comece mostrando a dor/problema de forma intensa. Pause. Apresente a solução como revelação. Demonstre o produto em ação. Termine com resultado e CTA.",
+    "vsl": "Estilo VSL (Video Sales Letter): Abra com um gancho forte e provocativo nos primeiros 3 segundos. Mostre o problema de forma visceral. Apresente a soluÃ§Ã£o como descoberta Ãºnica. Use urgÃªncia e escassez. Termine com CTA claro.",
+    "ugc": "Estilo UGC (User Generated Content): CÃ¢mera frontal, como se fosse um depoimento espontÃ¢neo. IluminaÃ§Ã£o natural, tom conversacional. A pessoa fala diretamente com a cÃ¢mera sobre sua experiÃªncia. CenÃ¡rio caseiro e autÃªntico.",
+    "before_after": "Estilo Before/After: Divida o vÃ­deo em dois momentos claros - o antes (problema, frustraÃ§Ã£o) e o depois (transformaÃ§Ã£o, resultado). TransiÃ§Ã£o dramÃ¡tica no meio. Mostre contraste visual forte.",
+    "depoimento": "Estilo Depoimento: Uma pessoa conta sua histÃ³ria real de transformaÃ§Ã£o com o produto. Tom emocional, vulnerÃ¡vel no inÃ­cio, confiante no final. Close no rosto, sem cenÃ¡rio distrativo.",
+    "problema_solucao": "Estilo Problema-SoluÃ§Ã£o: Comece mostrando a dor/problema de forma intensa. Pause. Apresente a soluÃ§Ã£o como revelaÃ§Ã£o. Demonstre o produto em aÃ§Ã£o. Termine com resultado e CTA.",
 }
 
 
@@ -1290,14 +1290,14 @@ def build_contextual_prompt(product: dict, decision: dict, strategy: dict, hook_
         base = custom_prompt
     else:
         if provider == "sora_video":
-            base = f"Vídeo publicitário profissional para '{nome}'"
+            base = f"VÃ­deo publicitÃ¡rio profissional para '{nome}'"
         else:
-            base = f"Criativo publicitário profissional para '{nome}'"
+            base = f"Criativo publicitÃ¡rio profissional para '{nome}'"
 
     # Add hook template direction
     template_text = HOOK_TEMPLATES.get(hook_template, "")
     if template_text:
-        base += f"\n\nDireção criativa: {template_text}"
+        base += f"\n\nDireÃ§Ã£o criativa: {template_text}"
 
     # Add contextual data from the analysis
     context_parts = []
@@ -1308,7 +1308,7 @@ def build_contextual_prompt(product: dict, decision: dict, strategy: dict, hook_
     if diferencial:
         context_parts.append(f"Diferencial: {diferencial}")
     if publico:
-        context_parts.append(f"Público-alvo: {publico}")
+        context_parts.append(f"PÃºblico-alvo: {publico}")
     if hook:
         context_parts.append(f"Hook vencedor: {hook}")
     if dor:
@@ -1316,13 +1316,13 @@ def build_contextual_prompt(product: dict, decision: dict, strategy: dict, hook_
     if big_idea:
         context_parts.append(f"Big Idea: {big_idea}")
     if angulo:
-        context_parts.append(f"Ângulo de venda: {angulo}")
+        context_parts.append(f"Ã‚ngulo de venda: {angulo}")
 
     if context_parts:
-        base += "\n\nContexto estratégico da análise:\n" + "\n".join(context_parts)
+        base += "\n\nContexto estratÃ©gico da anÃ¡lise:\n" + "\n".join(context_parts)
 
     if roteiro and provider == "sora_video" and not custom_prompt:
-        base += f"\n\nRoteiro UGC de referência: {roteiro[:300]}"
+        base += f"\n\nRoteiro UGC de referÃªncia: {roteiro[:300]}"
 
     return base
 
@@ -1335,7 +1335,7 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
         {"id": data.analysis_id, "user_id": user["id"]}, {"_id": 0}
     )
     if not analysis:
-        raise HTTPException(status_code=404, detail="Análise não encontrada")
+        raise HTTPException(status_code=404, detail="AnÃ¡lise nÃ£o encontrada")
 
     product = analysis["product"]
     decision = analysis.get("decision") or {}
@@ -1418,18 +1418,18 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
         logger.error(f"GPT Image error: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao gerar com GPT Image: {str(e)}")
 
-Retorne APENAS JSON válido (sem markdown):
+Retorne APENAS JSON vÃ¡lido (sem markdown):
 {
-  "conceito_visual": "string - descrição do conceito visual do anúncio",
+  "conceito_visual": "string - descriÃ§Ã£o do conceito visual do anÃºncio",
   "composicao": "string - como os elementos devem ser posicionados",
   "paleta_cores": ["string - 3-5 cores sugeridas com hex"],
   "tipografia": "string - estilo de fonte recomendado",
-  "elementos_visuais": ["string - 3-5 elementos visuais obrigatórios"],
-  "variacao_stories": "string - adaptação para formato stories",
-  "variacao_feed": "string - adaptação para formato feed quadrado",
+  "elementos_visuais": ["string - 3-5 elementos visuais obrigatÃ³rios"],
+  "variacao_stories": "string - adaptaÃ§Ã£o para formato stories",
+  "variacao_feed": "string - adaptaÃ§Ã£o para formato feed quadrado",
   "headline_visual": "string - texto para sobrepor na imagem",
-  "cta_visual": "string - texto do botão CTA",
-  "referencias_estilo": "string - referências de estilo visual"
+  "cta_visual": "string - texto do botÃ£o CTA",
+  "referencias_estilo": "string - referÃªncias de estilo visual"
 }
 Retorne SOMENTE o JSON."""
 
@@ -1457,13 +1457,13 @@ Retorne SOMENTE o JSON."""
             seconds=video_duration,
         )
 
-        # Poll até finalizar
+        # Poll atÃ© finalizar
         while job.status in ("queued", "in_progress"):
             time.sleep(2)
             job = openai_client.videos.retrieve(job.id)
 
         if job.status == "failed":
-            msg = getattr(getattr(job, "error", None), "message", "Falha ao gerar vídeo")
+            msg = getattr(getattr(job, "error", None), "message", "Falha ao gerar vÃ­deo")
             raise HTTPException(status_code=500, detail=msg)
 
         content = openai_client.videos.download_content(job.id, variant="video")
@@ -1482,7 +1482,7 @@ Retorne SOMENTE o JSON."""
         raise
     except Exception as e:
         logger.error(f"Sora 2 error: {e}")
-        raise HTTPException(status_code=500, detail=f"Erro ao gerar vídeo com Sora 2: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar vÃ­deo com Sora 2: {str(e)}")
 
 
 # --- pHash Visual Analysis ---
@@ -1658,3 +1658,4 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
