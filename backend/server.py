@@ -1522,7 +1522,7 @@ class ImageAnalysisInput(BaseModel):
 
 @api_router.post("/competitor/image-analysis")
 async def analyze_competitor_images(data: ImageAnalysisInput, user=Depends(get_current_user)):
-    """Analyze competitor images using pHash and compare with user's creatives."""
+    """Analyze competitor images using pHash and compare with user creatives."""
     results = []
 
     # Compute hashes for input images
