@@ -1,9 +1,13 @@
+openai_client = OpenAI()  # lê OPENAI_API_KEY do ambiente automaticamente
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+import time
+import base64
+from openai import OpenAI
 import os
 import logging
 import json
@@ -18,9 +22,6 @@ import uuid
 from datetime import datetime, timezone
 import bcrypt
 import jwt
-from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
-from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
-from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
 import httpx
 from bs4 import BeautifulSoup
 
@@ -1369,66 +1370,53 @@ async def generate_creative(data: CreativeGenerationInput, request: Request, use
     lang = request.headers.get("x-language", "pt")
     creative_id = str(uuid.uuid4())
 
-    if data.provider == "nano_banana":
-        try:
-            chat = LlmChat(
-                api_key=EMERGENT_KEY,
-                session_id=f"creative-nb-{creative_id}",
-                system_message="You are a professional ad creative designer."
-            )
-            chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
+    elif data.provider == "nano_banana":
+    try:
+        img = openai_client.images.generate(
+            model="gpt-image-1",
+            prompt=f"Professional ad creative: {base_prompt}. Modern, clean, high-contrast design for social media advertising. No text overlay."
+        )
 
-            msg = UserMessage(text=f"Create a professional ad creative image: {base_prompt}. Style: modern, clean, high-contrast, suitable for social media ads. Do NOT include any text in the image.")
-            text_resp, images = await chat.send_message_multimodal_response(msg)
+        image_b64 = img.data[0].b64_json
+        image_bytes = base64.b64decode(image_b64)
 
-            if not images:
-                raise HTTPException(status_code=500, detail="Nenhuma imagem gerada")
+        filename = f"{creative_id}.png"
+        filepath = GENERATED_DIR / filename
+        with open(filepath, "wb") as f:
+            f.write(image_bytes)
 
-            image_bytes = base64.b64decode(images[0]["data"])
-            filename = f"{creative_id}.png"
-            filepath = GENERATED_DIR / filename
-            with open(filepath, "wb") as f:
-                f.write(image_bytes)
-
-            result = {
-                "id": creative_id,
-                "provider": "nano_banana",
-                "image_url": f"/api/creatives/file/{creative_id}",
-                "text_response": text_resp,
-                "prompt_used": base_prompt,
-            }
-        except Exception as e:
-            logger.error(f"Nano Banana error: {e}")
-            raise HTTPException(status_code=500, detail=f"Erro ao gerar com Nano Banana: {str(e)}")
+        result = {
+            "id": creative_id,
+            "provider": "nano_banana",
+            "image_url": f"/api/creatives/file/{creative_id}",
+        }
+    except Exception as e:
+        logger.error(f"GPT Image error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar com Nano Banana: {str(e)}")
 
     elif data.provider == "gpt_image":
-        try:
-            image_gen = OpenAIImageGeneration(api_key=EMERGENT_KEY)
-            imgs = await image_gen.generate_images(
-                prompt=f"Professional ad creative: {base_prompt}. Modern, clean, high-contrast design for social media advertising. No text overlay.",
-                model="gpt-image-1",
-                number_of_images=1
-            )
-            if not imgs:
-                raise HTTPException(status_code=500, detail="Nenhuma imagem gerada")
+    try:
+        img = openai_client.images.generate(
+            model="gpt-image-1",
+            prompt=f"Professional ad creative: {base_prompt}. Modern, clean, high-contrast design for social media advertising. No text overlay."
+        )
 
-            filename = f"{creative_id}.png"
-            filepath = GENERATED_DIR / filename
-            with open(filepath, "wb") as f:
-                f.write(imgs[0])
+        image_b64 = img.data[0].b64_json
+        image_bytes = base64.b64decode(image_b64)
 
-            result = {
-                "id": creative_id,
-                "provider": "gpt_image",
-                "image_url": f"/api/creatives/file/{creative_id}",
-                "prompt_used": base_prompt,
-            }
-        except Exception as e:
-            logger.error(f"GPT Image error: {e}")
-            raise HTTPException(status_code=500, detail=f"Erro ao gerar com GPT Image: {str(e)}")
+        filename = f"{creative_id}.png"
+        filepath = GENERATED_DIR / filename
+        with open(filepath, "wb") as f:
+            f.write(image_bytes)
 
-    elif data.provider == "claude_text":
-        system_msg = """Você é um diretor criativo de anúncios. Gere um briefing visual detalhado para criação de anúncio.
+        result = {
+            "id": creative_id,
+            "provider": "gpt_image",
+            "image_url": f"/api/creatives/file/{creative_id}",
+        }
+    except Exception as e:
+        logger.error(f"GPT Image error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar com GPT Image: {str(e)}")
 
 Retorne APENAS JSON válido (sem markdown):
 {
@@ -1454,89 +1442,47 @@ Retorne SOMENTE o JSON."""
         }
 
     elif data.provider == "sora_video":
-        try:
-            video_size = data.video_size if data.video_size in ["1280x720", "1792x1024", "1024x1792", "1024x1024"] else "1280x720"
-            video_duration = data.video_duration if data.video_duration in [4, 8, 12] else 4
+    try:
+        video_size = data.video_size if data.video_size in ["1280x720", "1792x1024", "1024x1792", "1024x1024"] else "1280x720"
+        video_duration = data.video_duration if data.video_duration in [4, 8, 12] else 4
 
-            video_prompt = data.prompt or build_contextual_prompt(product, decision, strategy, data.hook_template or "", "", "sora_video")
+        video_prompt = data.prompt or build_contextual_prompt(
+            product, decision, strategy, data.hook_template or "", "", "sora_video"
+        )
 
-            def _generate_video():
-                video_gen = OpenAIVideoGeneration(api_key=EMERGENT_KEY)
-                return video_gen.text_to_video(
-                    prompt=video_prompt,
-                    model="sora-2",
-                    size=video_size,
-                    duration=video_duration,
-                    max_wait_time=600
-                )
+        job = openai_client.videos.create(
+            model="sora-2",
+            prompt=video_prompt,
+            size=video_size,
+            seconds=video_duration,
+        )
 
-            video_bytes = await asyncio.get_event_loop().run_in_executor(None, _generate_video)
+        # Poll até finalizar
+        while job.status in ("queued", "in_progress"):
+            time.sleep(2)
+            job = openai_client.videos.retrieve(job.id)
 
-            if not video_bytes:
-                raise HTTPException(status_code=500, detail="Falha na geração do vídeo")
+        if job.status == "failed":
+            msg = getattr(getattr(job, "error", None), "message", "Falha ao gerar vídeo")
+            raise HTTPException(status_code=500, detail=msg)
 
-            filename = f"{creative_id}.mp4"
-            filepath = GENERATED_DIR / filename
-            with open(filepath, "wb") as f:
-                f.write(video_bytes)
+        content = openai_client.videos.download_content(job.id, variant="video")
+        filepath = GENERATED_DIR / f"{creative_id}.mp4"
+        content.write_to_file(str(filepath))
 
-            result = {
-                "id": creative_id,
-                "provider": "sora_video",
-                "video_url": f"/api/creatives/file/{creative_id}",
-                "prompt_used": video_prompt,
-                "video_size": video_size,
-                "video_duration": video_duration,
-            }
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Sora 2 error: {e}")
-            raise HTTPException(status_code=500, detail=f"Erro ao gerar vídeo com Sora 2: {str(e)}")
-    else:
-        raise HTTPException(status_code=400, detail="Provider inválido")
-
-    doc = {
-        "id": creative_id,
-        "user_id": user["id"],
-        "analysis_id": data.analysis_id,
-        "provider": data.provider,
-        "result": result,
-        "version": version,
-        "version_group": version_group,
-        "parent_creative_id": data.parent_creative_id or None,
-        "hook_template": data.hook_template or None,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    await db.creatives.insert_one(doc)
-
-    result["version"] = version
-    result["hook_template"] = data.hook_template or None
-    return result
-
-@api_router.get("/creatives/file/{creative_id}")
-async def get_creative_file(creative_id: str):
-    # Check for image (png)
-    filepath_png = GENERATED_DIR / f"{creative_id}.png"
-    if filepath_png.exists():
-        return FileResponse(filepath_png, media_type="image/png")
-    # Check for video (mp4)
-    filepath_mp4 = GENERATED_DIR / f"{creative_id}.mp4"
-    if filepath_mp4.exists():
-        return FileResponse(filepath_mp4, media_type="video/mp4")
-    raise HTTPException(status_code=404, detail="Criativo não encontrado")
-
-@api_router.get("/creatives/hooks")
-async def get_hook_templates():
-    return {
-        "templates": [
-            {"id": "vsl", "label": "VSL (Video Sales Letter)", "desc": "Gancho forte + problema + solução + urgência", "icon": "zap"},
-            {"id": "ugc", "label": "UGC (User Generated)", "desc": "Depoimento espontâneo, câmera frontal, tom natural", "icon": "user"},
-            {"id": "before_after", "label": "Before/After", "desc": "Contraste dramático: antes do problema vs. depois", "icon": "arrow-right"},
-            {"id": "depoimento", "label": "Depoimento Emocional", "desc": "História real de transformação, tom vulnerável", "icon": "heart"},
-            {"id": "problema_solucao", "label": "Problema-Solução", "desc": "Dor intensa → pausa → revelação → produto em ação", "icon": "target"},
-        ]
-    }
+        result = {
+            "id": creative_id,
+            "provider": "sora_video",
+            "video_url": f"/api/creatives/file/{creative_id}",
+            "prompt_used": video_prompt,
+            "video_size": video_size,
+            "video_duration": video_duration,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Sora 2 error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar vídeo com Sora 2: {str(e)}")
 
 
 # --- pHash Visual Analysis ---
